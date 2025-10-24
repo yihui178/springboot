@@ -9,6 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * <p>
@@ -26,7 +30,7 @@ public class UserController {
     @Autowired
     protected UserService userService;
 
-    @Tag(name = "查询用户信息接口",description = "提供excel下载")
+    @Tag(name = "查询用户信息接口")
 //     测试查询所有用户
     @Operation(
             summary = "查询所有的用户信息",

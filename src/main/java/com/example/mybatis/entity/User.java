@@ -1,5 +1,6 @@
 package com.example.mybatis.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -30,7 +31,7 @@ public class User implements Serializable {
      * 主键ID
      */
     @ExcelProperty("id")
-    @TableId("id")
+    @TableId(value ="id",type = IdType.AUTO)
     private Long id;
 
     /**
@@ -39,6 +40,13 @@ public class User implements Serializable {
     @ExcelProperty("姓名")
     @TableField("name")
     private String name;
+
+    /**
+     * 密码
+     */
+    @ExcelProperty("密码")
+    @TableField("password")
+    private String password;
 
     /**
      * 年龄
@@ -53,4 +61,13 @@ public class User implements Serializable {
     @ExcelProperty("邮箱")
     @TableField("email")
     private String email;
+
+    /**
+     * 角色
+     */
+    @ExcelProperty("角色")
+    @TableField("role")
+    private String role;
+
+
 }

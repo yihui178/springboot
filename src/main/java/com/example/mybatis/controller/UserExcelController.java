@@ -54,6 +54,7 @@ public class UserExcelController {
         row0.createCell(columnIndex).setCellValue("No");
         row0.createCell(++columnIndex).setCellValue("ID");
         row0.createCell(++columnIndex).setCellValue("昵称");
+        row0.createCell(++columnIndex).setCellValue("密码");
         row0.createCell(++columnIndex).setCellValue("年龄");
         row0.createCell(++columnIndex).setCellValue("邮箱");
 //        row0.createCell(++columnIndex).setCellValue("手机号");
@@ -66,6 +67,7 @@ public class UserExcelController {
             row.createCell(columnIndex).setCellValue(i + 1); // 设置序号
             row.createCell(++columnIndex).setCellValue(user.getId());
             row.createCell(++columnIndex).setCellValue(user.getName());
+            row.createCell(++columnIndex).setCellValue(user.getPassword());
             row.createCell(++columnIndex).setCellValue(user.getAge());
             row.createCell(++columnIndex).setCellValue(user.getEmail());
 //            row.createCell(++columnIndex).setCellValue(user.getPhone());

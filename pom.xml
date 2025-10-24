@@ -164,6 +164,43 @@
             <version>32.1.3-jre</version>
         </dependency>
 
+        <!--添加 JWT 依赖        -->
+        <!-- JJWT 核心库 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+
+        <!-- 实现包 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- 支持 JWT 签名加密 (HMAC / RSA / EC) -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+<!--        &lt;!&ndash; BCrypt密码加密（注册时加密密码） &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-security</artifactId>-->
+<!--            <exclusions>-->
+<!--                &lt;!&ndash; 仅用加密功能，排除Security自动登录拦截（避免影响现有接口） &ndash;&gt;-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-starter-web</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
     </dependencies>
     <repositories>
 

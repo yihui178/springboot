@@ -2,8 +2,10 @@ package com.example.mybatis.controller;
 
 import com.example.mybatis.exception.SpringException;
 import com.example.mybatis.http.HttpResult;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -40,19 +42,25 @@ public class GlobalExceptionHandler {
      * 处理参数校验异常（@Valid 注解校验失败）
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public HttpResult handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public HttpResult<Map<String, Object>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("参数校验异常: {}", e.getMessage(), e);
         BindingResult bindingResult = e.getBindingResult();
+
+        // 1. 收集所有字段校验错误（字段名 → 错误信息）
         Map<String, String> errorMap = new HashMap<>();
-        // 收集所有字段校验错误
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
             errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
-        return HttpResult.error(
-                HttpStatus.BAD_REQUEST.value(),
-                "参数校验失败",
-                errorMap
-        );
+
+        // 2. 构造返回数据：包含错误码、错误信息、错误详情（适配 Vben 前端解析）
+        Map<String, Object> resultData = new HashMap<>();
+        resultData.put("code", HttpStatus.BAD_REQUEST.value()); // 400：参数错误码
+        resultData.put("message", "参数校验失败"); // 错误提示
+        resultData.put("errorDetails", errorMap); // 字段错误详情（供前端渲染表单提示）
+
+        // 3. 调用 HttpResult 标准方法：用 ok(T data) 携带错误数据，code 已在 resultData 中标识
+        // 注意：标准 HttpResult 的 ok 方法会默认设 code=0，需前端通过 resultData 中的 code 判断失败
+        return HttpResult.ok(resultData);
     }
 
     /**
@@ -120,6 +128,15 @@ public class GlobalExceptionHandler {
 ////        String message = "文件操作失败，请检查文件是否存在或有权限";
 //        return HttpResult.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
 //    }
+
+    // 处理JWT过期异常
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException e) {
+        // 返回401状态码，让前端知道需要刷新令牌
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("Token expired, please refresh");
+    }
+
 
     /**
      * 处理其他未知异常
