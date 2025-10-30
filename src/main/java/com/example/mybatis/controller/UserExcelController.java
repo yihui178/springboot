@@ -2,6 +2,8 @@ package com.example.mybatis.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -10,21 +12,26 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.mybatis.common.FileUtils;
 import com.example.mybatis.common.PoiUtils;
 import com.example.mybatis.entity.User;
+import com.example.mybatis.mapper.UserMapper;
 import com.example.mybatis.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -33,7 +40,10 @@ import java.util.List;
 @RestController
 public class UserExcelController {
 
+    @Autowired
     private final UserService userService;
+    @Autowired
+    private UserMapper userMapper;
 
     public UserExcelController(UserService userService) {
         this.userService = userService;
@@ -53,7 +63,7 @@ public class UserExcelController {
         int columnIndex = 0;
         row0.createCell(columnIndex).setCellValue("No");
         row0.createCell(++columnIndex).setCellValue("ID");
-        row0.createCell(++columnIndex).setCellValue("昵称");
+        row0.createCell(++columnIndex).setCellValue("姓名");
         row0.createCell(++columnIndex).setCellValue("密码");
         row0.createCell(++columnIndex).setCellValue("年龄");
         row0.createCell(++columnIndex).setCellValue("邮箱");
@@ -81,39 +91,98 @@ public class UserExcelController {
     @Tag(name = "Excel导出接口", description = "提供excel下载")
     @Operation(summary = "提供EasyExcel下载")
     @GetMapping("/exportUsers")
-    public void exportUsers(HttpServletResponse response) throws IOException {
-        // 设置响应头
-        response.setContentType("application/vnd.ms-excel");
-        response.setCharacterEncoding("utf-8");
+    public void exportUsers(HttpServletResponse response) {
+        ExcelWriter excelWriter = null;
+        try {
+            // 设置响应头
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("utf-8");
+            String fileName = URLEncoder.encode("用户信息导出", "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
 
-        String fileName = URLEncoder.encode("用户信息导出", "UTF-8").replaceAll("\\+", "%20");
-        response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
+            // 构建 EasyExcel 写入器
+            excelWriter = EasyExcel.write(response.getOutputStream(), User.class).build();
 
-//        // 从数据库获取数据
-//        List<User> userList = userService.list();
-//
-//        // 导出到浏览器
-//        EasyExcel.write(response.getOutputStream(), User.class)
-//                .sheet("用户信息")
-//                .doWrite(userList);
-        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream(), User.class).build();
-        WriteSheet writeSheet = EasyExcel.writerSheet("用户数据").build();
+            int page = 1;
+            int pageSize = 500000; // 每个sheet最多写50万行，防止超出上限
+            int sheetNo = 0;
 
-        // 分页查询 + 写入循环
-        int page = 1;
-        int pageSize = 5000;
-        Wrapper<User> queryWrapper = new QueryWrapper<>();  // 你可以添加条件 queryWrapper.eq("status", 1);
-        while (true) {
-            IPage<User> iPage = new Page<>(page, pageSize);
-            IPage<User> resultPage = userService.page(iPage, queryWrapper);
-            List<User> list = resultPage.getRecords();
-            if (list.isEmpty()) break;
+            while (true) {
+                IPage<User> iPage = new Page<>(page, pageSize);
+                List<User> list = userService.page(iPage).getRecords();
 
-            excelWriter.write(list, writeSheet);
-            if (list.size() < pageSize) break; // 最后一页
-            page++;
+                if (list == null || list.isEmpty()) {
+                    break;
+                }
+
+                // 每次新建一个sheet
+                WriteSheet writeSheet = EasyExcel.writerSheet(sheetNo, "用户数据" + (sheetNo + 1)).build();
+                excelWriter.write(list, writeSheet);
+
+                // 小于一页说明写完
+                if (list.size() < pageSize) {
+                    break;
+                }
+
+                page++;
+                sheetNo++;
+            }
+
+            excelWriter.finish();
+        } catch (Exception e) {
+            // 如果出现异常，返回JSON提示
+            try {
+                response.reset();
+                response.setContentType("application/json;charset=utf-8");
+                response.getWriter().write("{\"message\":\"导出失败，请联系管理员！\"}");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
-
-        excelWriter.finish();
     }
+
+
+
+
+    @Tag(name = "Excel导入接口", description = "导入用户数据")
+    @Operation(
+            summary = "上传 Excel 文件导入用户",
+            description = "通过 multipart/form-data 上传 Excel 文件进行导入"
+    )
+    @PostMapping(value = "/importUsers", consumes = "multipart/form-data")
+    public String importUsers(
+            @Parameter(description = "Excel 文件", required = true)
+            @RequestPart("file") MultipartFile file) throws Exception {
+
+        // ⭐ 第1步：根据当前最大ID重置自增计数器
+        Long maxId = userService.lambdaQuery()
+                .select(User::getId)
+                .orderByDesc(User::getId)
+                .last("LIMIT 1")
+                .oneOpt()
+                .map(User::getId)
+                .orElse(0L);
+        userMapper.updateAutoIncrement(maxId + 1);
+
+        // ⭐ 第2步：执行导入
+        EasyExcel.read(file.getInputStream(), User.class, new UserExcelListener(userService))
+                .sheet()
+                .doRead();
+        return "用户数据导入成功！";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
