@@ -33,8 +33,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
-
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 @RestController
@@ -144,17 +145,14 @@ public class UserExcelController {
 
 
 
-    @Tag(name = "Excel导入接口", description = "导入用户数据")
-    @Operation(
-            summary = "上传 Excel 文件导入用户",
-            description = "通过 multipart/form-data 上传 Excel 文件进行导入"
-    )
+    @Tag(name = "Excel导入接口", description = "异步导入用户数据")
+    @Operation(summary = "异步上传 Excel 文件导入用户")
     @PostMapping(value = "/importUsers", consumes = "multipart/form-data")
     public String importUsers(
             @Parameter(description = "Excel 文件", required = true)
             @RequestPart("file") MultipartFile file) throws Exception {
 
-        // ⭐ 第1步：根据当前最大ID重置自增计数器
+        //  第1步：重置自增主键
         Long maxId = userService.lambdaQuery()
                 .select(User::getId)
                 .orderByDesc(User::getId)
@@ -164,11 +162,20 @@ public class UserExcelController {
                 .orElse(0L);
         userMapper.updateAutoIncrement(maxId + 1);
 
-        // ⭐ 第2步：执行导入
-        EasyExcel.read(file.getInputStream(), User.class, new UserExcelListener(userService))
-                .sheet()
-                .doRead();
-        return "用户数据导入成功！";
+        //  第2步：异步执行导入任务
+        ExecutorService executorService = Executors.newFixedThreadPool(4); // 可调整线程数
+        CompletableFuture.runAsync(() -> {
+            try {
+                EasyExcel.read(file.getInputStream(), User.class, new UserExcelListener(userService))
+                        .sheet()
+                        .doRead();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, executorService);
+
+        // 不等待导入完成，直接返回响应
+        return "导入任务已开始，请稍后查看结果。";
     }
 
 
