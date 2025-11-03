@@ -49,16 +49,23 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     public HttpResult<Map<String, String>> login(@RequestBody Map<String, String> loginForm) {
-        // 1. 接收前端参数（Vben 登录表单默认传递 username/password）
+        // 1. 接收前端参数（Vben 登录表单默认传递 username/password/captcha）
         String username = loginForm.get("username");
         String password = loginForm.get("password");
+        String captchaToken = loginForm.get("captcha");
 
         // 2. 参数校验（前端也会校验，后端双重保障）
         if (ObjectUtils.isEmpty(username)) {
-            return HttpResult.error(400, "用户名不能为空"); // code≠0表示失败，符合前端格式
+            return HttpResult.error(400, "用户名不能为空");
         }
         if (ObjectUtils.isEmpty(password)) {
             return HttpResult.error(400, "密码不能为空");
+        }
+        if (ObjectUtils.isEmpty(captchaToken)) {
+            return HttpResult.error(400, "请先完成滑块验证");
+        }
+        if (captchaToken.length() < 16) {
+            return HttpResult.error(401, "验证码token无效");
         }
 
         // 3. 数据库查询用户（按前端Mock账号逻辑，支持super/admin/user角色）
@@ -279,6 +286,23 @@ public class AuthController {
 
     private List<String> getPermsByRole(String role) {
         return ROLE_PERMISSIONS.getOrDefault(role, Collections.emptyList());
+    }
+
+    @PostMapping("/auth/verifyCaptcha")
+    public HttpResult<String> verifyCaptcha(@RequestBody Map<String, String> captchaForm) {
+        // 1. 接收前端传递的token（即滑块验证通过后生成的随机字符串）
+        String captchaToken = captchaForm.get("captcha");
+        if (ObjectUtils.isEmpty(captchaToken)) {
+            return HttpResult.error(400, "验证码token不能为空");
+        }
+        // 2. 校验token有效性（此处仅做演示，实际可结合Redis或数据库存储token，或简单校验格式）
+        // 示例：token长度需≥16位
+        if (captchaToken.length() < 16) {
+            return HttpResult.error(401, "验证码token无效");
+        }
+        // 3. 校验通过，返回成功
+        System.out.println("====================captchaToken:"+captchaToken);
+        return HttpResult.ok("后端验证码校验通过");
     }
 
 
