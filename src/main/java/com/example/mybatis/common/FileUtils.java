@@ -7,7 +7,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class FileUtils {
-    public static void downloadFile(HttpServletResponse response, File file, String newFileName) {
+    public static void downloadFile(HttpServletResponse response, File file, String newFileName,boolean deleteAfter) {
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=" +
                 URLEncoder.encode(newFileName, StandardCharsets.UTF_8));
@@ -22,7 +22,9 @@ public class FileUtils {
         } catch (IOException e) {
             throw new RuntimeException("文件下载失败", e);
         } finally {
-            if (file.exists()) file.delete();
+            if (deleteAfter && file != null && file.exists()) {
+                try { file.delete(); } catch (Exception ignore) {}
+            }
         }
     }
 }

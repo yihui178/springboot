@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.example.mybatis.entity.User;
 import com.example.mybatis.http.HttpResult;
-import com.example.mybatis.service.UserService;
+import com.example.mybatis.service.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -12,6 +12,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.example.mybatis.entity.Permission;
+import com.example.mybatis.common.*;
+
 
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,55 +29,63 @@ import java.util.*;
 @RestController
 public class AuthController {
 
-    private static final String SECRET_KEY = "your-very-secret-and-long-key-12345678";
-    private static final Key SIGNING_KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-    private static final long TOKEN_EXPIRE = 36000000; // Token 有效期：10s 1小时
+//    private static final String SECRET_KEY = "your-very-secret-and-long-key-12345678";
+//    private static final Key SIGNING_KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+//    private static final long TOKEN_EXPIRE = 3600000; // Token 有效期 1小时
 
 
-    public static final String ROLE_SUPER = "super";
-    public static final String ROLE_ADMIN = "admin";
-    public static final String ROLE_USER = "user";
-
-    // 角色-权限映射（与前端v-perm指令对应）
-    private static final Map<String, List<String>> ROLE_PERMISSIONS = new HashMap<>();
-
-    static {
-        ROLE_PERMISSIONS.put(ROLE_SUPER, Arrays.asList("user:add", "user:delete", "user:edit", "user:view", "system:config"));
-        ROLE_PERMISSIONS.put(ROLE_ADMIN, Arrays.asList("user:add", "user:edit", "user:view"));
-        ROLE_PERMISSIONS.put(ROLE_USER, Collections.singletonList("user:view"));
-    }
+//    public static final String ROLE_SUPER = "super";
+//    public static final String ROLE_ADMIN = "admin";
+//    public static final String ROLE_USER = "user";
+//
+//    // 角色-权限映射（与前端v-perm指令对应）
+//    private static final Map<String, List<String>> ROLE_PERMISSIONS = new HashMap<>();
+//
+//    static {
+//        ROLE_PERMISSIONS.put(ROLE_SUPER, Arrays.asList("user:add", "user:delete", "user:edit", "user:view", "system:config"));
+//        ROLE_PERMISSIONS.put(ROLE_ADMIN, Arrays.asList("user:add", "user:edit", "user:view"));
+//        ROLE_PERMISSIONS.put(ROLE_USER, Collections.singletonList("user:view"));
+//    }
     // 1. 保留你的简化用户信息接口（无需Token，临时用）
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private PermissionService permissionService;
+
+    @Autowired
+    private UserRoleService userRoleService;
+
+    @Autowired
+    private RolePermissionService rolePermissionService;
+
     @PostMapping("/auth/login")
-    public HttpResult<Map<String, String>> login(@RequestBody Map<String, String> loginForm) {
-        // 1. 接收前端参数（Vben 登录表单默认传递 username/password/captcha）
+    public HttpResult<Map<String, Object>> login(@RequestBody Map<String, String> loginForm) {
         String username = loginForm.get("username");
         String password = loginForm.get("password");
         String captchaToken = loginForm.get("captcha");
 
-        // 2. 参数校验（前端也会校验，后端双重保障）
         if (ObjectUtils.isEmpty(username)) {
             return HttpResult.error(400, "用户名不能为空");
         }
         if (ObjectUtils.isEmpty(password)) {
             return HttpResult.error(400, "密码不能为空");
         }
-        if (ObjectUtils.isEmpty(captchaToken)) {
-            return HttpResult.error(400, "请先完成滑块验证");
-        }
-        if (captchaToken.length() < 16) {
+        if (ObjectUtils.isEmpty(captchaToken) || captchaToken.length() < 16) {
             return HttpResult.error(401, "验证码token无效");
         }
 
-        // 3. 数据库查询用户（按前端Mock账号逻辑，支持super/admin/user角色）
+        // 1. 只按用户名查，不再限制固定角色
         User user = userService.lambdaQuery()
                 .eq(User::getName, username)
-                .in(User::getRole, Arrays.asList(ROLE_SUPER, ROLE_ADMIN, ROLE_USER)) // 仅查询有效角色
                 .one();
 
-        // 4. 身份校验（前端Mock密码为123456，后端可暂用明文，生产环境需改BCrypt）
         if (user == null) {
             return HttpResult.error(401, "账号不存在");
         }
@@ -82,82 +93,80 @@ public class AuthController {
             return HttpResult.error(401, "账号或密码错误");
         }
 
+        // 2. 查这个用户拥有哪些角色（来自 user_role 表）
+        List<Long> roleIds = userRoleService.listRoleIdsByUserId(user.getId());
+        // 根据 roleIds 查角色编码，比如 admin、user...
+        List<String> roleCodes = roleService.listByIds(roleIds).stream()
+                .map(role -> role.getCode())   // 看你角色表字段叫什么，可能是getRoleCode()/getName()
+                .filter(Objects::nonNull)
+                .toList();
 
-        // 5. 生成Token（携带用户ID和角色，供前端后续解析）
-        String token = Jwts.builder()
-                .setSubject(username) // 关联用户名
-                .claim("userId", user.getId()) // 扩展字段：用户ID
-                .claim("currentRole", user.getRole()) // 扩展字段：当前角色（适配权限控制）
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRE))
-                .signWith(SIGNING_KEY, SignatureAlgorithm.HS256)
-                .compact();
+        // 3. 查权限
+        List<String> perms = getPermissionsByUserId(user.getId());
 
+        // 4. 生成 token —— 可以把角色也放进去，前端有时候喜欢直接从token里拿
+        String token = jwtUtils.generateToken(user.getId(), username, roleCodes);
 
-        // 5. 返回结果（Vben 前端要求返回 accessToken）
-        Map<String, String> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
         data.put("accessToken", token);
+        data.put("roles", roleCodes);
+        data.put("permissions", perms);
         return HttpResult.ok(data);
     }
 
 
 
+
     @GetMapping("/user/info")
     public HttpResult<Map<String, Object>> getUserInfo(HttpServletRequest request) {
-        // 1. 从请求头获取 Token（Vben 前端会自动携带 Authorization: Bearer ${token}）
-        System.out.println("token: " + request.getHeader("token"));
-        System.out.println("token: " + request.getHeader("Authorization"));
         String authHeader = request.getHeader("Authorization");
         if (ObjectUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ")) {
-            return HttpResult.error(401, "Token缺失，请先登录"); // 401-Token缺失
+            return HttpResult.error(401, "Token缺失，请先登录");
         }
 
         String token = authHeader.substring(7);
-        // 2. 校验Token格式（避免非法Token导致500）
         if (!token.contains(".") || token.split("\\.").length != 3) {
-            return HttpResult.error(401, "Token格式无效，请重新登录"); // 401-Token非法
+            return HttpResult.error(401, "Token格式无效，请重新登录");
         }
-        try {
 
-            // 2. 解析 Token，获取用户 ID
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(SIGNING_KEY)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+        try {
+            Claims claims = jwtUtils.parseClaims(token);
 
             Long userId = claims.get("userId", Long.class);
-            String currentRole = claims.get("currentRole", String.class);
 
-            // 3. 查询用户完整信息
             User user = userService.getById(userId);
             if (user == null) {
                 return HttpResult.error(401, "登录用户不存在");
             }
 
-            // 4. 构造前端所需数据（严格包含roles和realName，扩展字段可选）
+            // 1. 查角色
+            List<Long> roleIds = userRoleService.listRoleIdsByUserId(userId);
+            List<String> roleCodes = roleService.listByIds(roleIds).stream()
+                    .map(role -> role.getCode())
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            // 2. 查权限
+            List<String> perms = getPermissionsByUserId(userId);
+
             Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("roles", Collections.singletonList(currentRole)); // 必须是数组（前端UserInfo接口要求）
-            userInfo.put("realName", user.getName()); // 必须字段（前端显示用户名）
-            // 扩展字段（前端可按需使用）
+            userInfo.put("roles", roleCodes);          // 前端一般要数组
+            userInfo.put("realName", user.getName());
             userInfo.put("userId", user.getId());
             userInfo.put("username", user.getName());
             userInfo.put("email", user.getEmail());
-            userInfo.put("perms", getPermsByRole(currentRole)); // 权限码（适配前端按钮级控制）
+            userInfo.put("perms", perms);
 
-            System.out.println("完整信息: " + userInfo);
             return HttpResult.ok(userInfo);
-            } catch (ExpiredJwtException e) {
-                // Token过期：明确返回401
-                return HttpResult.error(401, "Token已过期，请重新登录");
-            } catch (Exception e) {
-                // 其他Token错误（如签名无效）：返回401
-                return HttpResult.error(401, "Token无效，请重新登录");
-            }
-
+        } catch (ExpiredJwtException e) {
+            return HttpResult.error(401, "Token已过期，请重新登录");
+        } catch (Exception e) {
+            return HttpResult.error(401, "Token无效，请重新登录");
+        }
     }
 
-//     2. 恢复登录接口（生成Token，供前端登录调用）
+
+    //     2. 恢复登录接口（生成Token，供前端登录调用）
 //     密钥：确保≥32字节（HS256算法要求）
 //
 //
@@ -172,35 +181,36 @@ public class AuthController {
         String oldToken = authHeader.substring(7);
 
         try {
-            // 解析旧Token获取用户信息
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(SIGNING_KEY)
-                    .build()
-                    .parseClaimsJws(oldToken)
-                    .getBody();
+            Claims claims = jwtUtils.parseClaims(oldToken);
 
-            String username = claims.getSubject();
             Long userId = claims.get("userId", Long.class);
-            String currentRole = claims.get("currentRole", String.class);
+            User user = userService.getById(userId);
+            if (user == null) {
+                return HttpResult.error(401, "用户不存在");
+            }
 
-            // 生成新Token（有效期重置）
-            String newToken = Jwts.builder()
-                    .setSubject(username)
-                    .claim("userId", userId)
-                    .claim("currentRole", currentRole)
-                    .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRE))
-                    .signWith(SIGNING_KEY, SignatureAlgorithm.HS256)
-                    .compact();
+// 重新查角色
+            List<Long> roleIds = userRoleService.listRoleIdsByUserId(userId);
+            List<String> roleCodes = roleService.listByIds(roleIds).stream()
+                    .map(role -> role.getCode())
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            String newToken = jwtUtils.generateToken(userId, user.getName(), roleCodes);
 
             Map<String, String> data = new HashMap<>();
             data.put("accessToken", newToken);
             return HttpResult.ok(data);
 
+
+
         } catch (Exception e) {
             return HttpResult.error(401, "Token无效或已过期，需重新登录");
         }
     }
+
+
+
     @GetMapping("/auth/codes")
     public HttpResult getAccessCodes() {
         return HttpResult.ok(List.of()); // 必须返回空数组，匹配前端需求
@@ -284,9 +294,7 @@ public class AuthController {
         }
     }
 
-    private List<String> getPermsByRole(String role) {
-        return ROLE_PERMISSIONS.getOrDefault(role, Collections.emptyList());
-    }
+
 
     @PostMapping("/auth/verifyCaptcha")
     public HttpResult<String> verifyCaptcha(@RequestBody Map<String, String> captchaForm) {
@@ -303,6 +311,74 @@ public class AuthController {
         // 3. 校验通过，返回成功
         System.out.println("====================captchaToken:"+captchaToken);
         return HttpResult.ok("后端验证码校验通过");
+    }
+
+    @GetMapping("/auth/access")
+    public HttpResult<Map<String, Object>> getAccess(HttpServletRequest request) {
+        try {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return HttpResult.error(401, "缺少Token");
+            }
+            String token = authHeader.substring(7);
+            Long userId = jwtUtils.parseUserId(token);
+
+
+            // 查角色
+            List<Long> roleIds = userRoleService.listRoleIdsByUserId(userId);
+            List<String> roleCodes = roleService.listByIds(roleIds).stream()
+                    .map(r -> r.getCode())
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            // 查权限码
+            List<String> perms = getPermissionsByUserId(userId);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("roles", roleCodes);
+            result.put("accessCodes", perms);
+
+            return HttpResult.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return HttpResult.error(401, "Token解析失败");
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * 从数据库获取指定用户的权限码列表
+     */
+    private List<String> getPermissionsByUserId(Long userId) {
+        // 1. 查询用户拥有的角色
+        List<Long> roleIds = userRoleService.listRoleIdsByUserId(userId);
+        if (roleIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2. 查询角色对应的权限
+        List<Long> permIds = rolePermissionService.listPermissionIdsByRoleIds(roleIds);
+        if (permIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 3. 查询权限code
+        return permissionService.listByIds(permIds)
+                .stream()
+                .map(Permission::getCode)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
 

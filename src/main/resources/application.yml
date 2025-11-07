@@ -1,3 +1,6 @@
+jwt:
+    secret: ${JWT_SECRET:replace_with_real_secret_at_deploy_time_1234567890_abcdefg}
+    expire-ms: 3600000  # Token有效期(毫秒)：1小时
 aj:
     captcha:
 #        type: blockPuzzle       # 验证码类型: blockPuzzle(滑块) 或 clickWord(文字点选)

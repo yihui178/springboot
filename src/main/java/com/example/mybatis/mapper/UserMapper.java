@@ -21,3 +21,4 @@ public interface UserMapper extends BaseMapper<User> {
     void updateAutoIncrement(@Param("nextId") Long nextId);
 
 }
+

@@ -86,7 +86,7 @@ public class UserExcelController {
 
         // 创建文件并下载
         File file = PoiUtils.createExcelFile(workbook, "download_user");
-        FileUtils.downloadFile(res, file, file.getName());
+        FileUtils.downloadFile(res, file, file.getName(), true);
     }
 
     @Tag(name = "Excel导出接口", description = "提供excel下载")
