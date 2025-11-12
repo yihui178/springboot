@@ -188,18 +188,12 @@
             <scope>runtime</scope>
         </dependency>
 
-<!--        &lt;!&ndash; BCrypt密码加密（注册时加密密码） &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-security</artifactId>-->
-<!--            <exclusions>-->
-<!--                &lt;!&ndash; 仅用加密功能，排除Security自动登录拦截（避免影响现有接口） &ndash;&gt;-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.springframework.boot</groupId>-->
-<!--                    <artifactId>spring-boot-starter-web</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
+        <!-- PageHelper 分页 -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.4.7</version>
+        </dependency>
 
     </dependencies>
     <repositories>

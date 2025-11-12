@@ -7,9 +7,7 @@ import com.example.mybatis.http.HttpResult;
 import com.example.mybatis.service.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.mybatis.entity.Permission;
@@ -17,10 +15,7 @@ import com.example.mybatis.common.*;
 
 
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
 
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.*;
 
 
@@ -29,24 +24,7 @@ import java.util.*;
 @RestController
 public class AuthController {
 
-//    private static final String SECRET_KEY = "your-very-secret-and-long-key-12345678";
-//    private static final Key SIGNING_KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-//    private static final long TOKEN_EXPIRE = 3600000; // Token 有效期 1小时
 
-
-//    public static final String ROLE_SUPER = "super";
-//    public static final String ROLE_ADMIN = "admin";
-//    public static final String ROLE_USER = "user";
-//
-//    // 角色-权限映射（与前端v-perm指令对应）
-//    private static final Map<String, List<String>> ROLE_PERMISSIONS = new HashMap<>();
-//
-//    static {
-//        ROLE_PERMISSIONS.put(ROLE_SUPER, Arrays.asList("user:add", "user:delete", "user:edit", "user:view", "system:config"));
-//        ROLE_PERMISSIONS.put(ROLE_ADMIN, Arrays.asList("user:add", "user:edit", "user:view"));
-//        ROLE_PERMISSIONS.put(ROLE_USER, Collections.singletonList("user:view"));
-//    }
-    // 1. 保留你的简化用户信息接口（无需Token，临时用）
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -110,7 +88,7 @@ public class AuthController {
         Map<String, Object> data = new HashMap<>();
         data.put("accessToken", token);
         data.put("roles", roleCodes);
-        data.put("permissions", perms);
+//        data.put("permissions", perms);
         return HttpResult.ok(data);
     }
 
@@ -166,11 +144,7 @@ public class AuthController {
     }
 
 
-    //     2. 恢复登录接口（生成Token，供前端登录调用）
-//     密钥：确保≥32字节（HS256算法要求）
-//
-//
-//
+
 //     3. 可选：恢复刷新Token接口（避免Token过期后重新登录）
     @PostMapping("/auth/refreshToken")
     public HttpResult<Map<String, String>> refreshToken(HttpServletRequest request) {
@@ -212,9 +186,36 @@ public class AuthController {
 
 
     @GetMapping("/auth/codes")
-    public HttpResult getAccessCodes() {
-        return HttpResult.ok(List.of()); // 必须返回空数组，匹配前端需求
+    public HttpResult<List<String>> getAccessCodes(HttpServletRequest request) {
+        try {
+            // 1️⃣ 从 Token 获取 userId
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return HttpResult.error(401, "缺少Token");
+            }
+            String token = authHeader.substring(7);
+            Long userId = jwtUtils.parseUserId(token);
+
+            // 2️⃣ 获取所有权限码
+            List<Long> roleIds = userRoleService.listRoleIdsByUserId(userId);
+            List<Long> permIds = rolePermissionService.listPermissionIdsByRoleIds(roleIds);
+
+            // 3️⃣ 查询仅按钮权限
+            List<String> codes = permissionService.listByIds(permIds)
+                    .stream()
+                    .filter(p -> "button".equalsIgnoreCase(p.getType()))
+                    .map(Permission::getCode)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            return HttpResult.ok(codes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return HttpResult.error(401, "Token解析失败");
+        }
     }
+
+
 
     // 2. 补充/auth/logout接口（前端登出时调用，清除Token即可）
     @PostMapping("/auth/logout")

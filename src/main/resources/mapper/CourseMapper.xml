@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mapper.CourseMapper">
+
+    <!-- resultMap 可以用来映射 highlight_str 到 highlightStr 字段  -->
+    <resultMap id="CourseResultMap" type="com.example.mybatis.entity.Course">
+        <id property="id" column="id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="category" column="category"/>
+        <result property="description" column="description"/>
+        <result property="online" column="online"/>
+        <result property="highlightStr" column="highlight_str"/>
+    </resultMap>
+
+    <!-- 根据关键字查询（用于 PageHelper 分页） -->
+    <select id="selectByKeyword" resultMap="CourseResultMap" parameterType="java.lang.String">
+        SELECT id, course_name, category, description, online, highlight_str
+        FROM course
+        <where>
+            <if test="keyword != null and keyword.trim() != ''">
+                (course_name LIKE CONCAT('%', #{keyword}, '%')
+                OR description LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>
