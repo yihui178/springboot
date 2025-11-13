@@ -2,6 +2,7 @@ package com.example.mybatis.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.entity.User;
 import com.example.mybatis.http.HttpResult;
 import com.example.mybatis.service.*;
@@ -96,7 +97,7 @@ public class AuthController {
 
 
     @GetMapping("/user/info")
-    public HttpResult<Map<String, Object>> getUserInfo(HttpServletRequest request) {
+    public HttpResult<UserDTO> getUserInfo(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (ObjectUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ")) {
             return HttpResult.error(401, "Token缺失，请先登录");
@@ -125,17 +126,12 @@ public class AuthController {
                     .toList();
 
             // 2. 查权限
-            List<String> perms = getPermissionsByUserId(userId);
-
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("roles", roleCodes);          // 前端一般要数组
-            userInfo.put("realName", user.getName());
-            userInfo.put("userId", user.getId());
-            userInfo.put("username", user.getName());
-            userInfo.put("email", user.getEmail());
-            userInfo.put("perms", perms);
-
-            return HttpResult.ok(userInfo);
+            UserDTO dto = new UserDTO();
+            dto.setId(user.getId());
+            dto.setName(user.getName());
+            dto.setEmail(user.getEmail());
+            dto.setRole(String.join(",", roleCodes));
+            return HttpResult.ok(dto);
         } catch (ExpiredJwtException e) {
             return HttpResult.error(401, "Token已过期，请重新登录");
         } catch (Exception e) {

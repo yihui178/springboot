@@ -1,6 +1,7 @@
 package com.example.mybatis.controller;
 
 import com.example.mybatis.common.CheckParamUtils;
+import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.entity.User;
 import com.example.mybatis.http.HttpResult;
 import com.example.mybatis.service.UserService;
@@ -39,10 +40,13 @@ public class UserController {
     @GetMapping
     public HttpResult getAllUsers() {
         try {
-            // 校验参数
-            // CheckParamUtils.isBiggerZero(10L, "用户ID");  // 示例
             // 查询所有用户
-            return HttpResult.ok(userService.list());
+            List<UserDTO> list = userService.list().stream().map(user -> {
+                UserDTO dto = new UserDTO();
+                org.springframework.beans.BeanUtils.copyProperties(user, dto);
+                return dto;
+            }).toList();
+            return HttpResult.ok(list);
         } catch (IllegalArgumentException e) {
             return HttpResult.error(400, e.getMessage());
         } catch (Exception e) {
@@ -62,7 +66,9 @@ public class UserController {
                 return HttpResult.error(404, "用户不存在");
             }
 
-            return HttpResult.ok(user);
+            UserDTO dto = new UserDTO();
+            org.springframework.beans.BeanUtils.copyProperties(user, dto);
+            return HttpResult.ok(dto);
         } catch (IllegalArgumentException e) {
             // 捕获参数校验异常
             return HttpResult.error(400, e.getMessage());

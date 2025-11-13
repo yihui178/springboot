@@ -1,4 +1,4 @@
-package com.example.mybatis.exception;
+package com.example.mybatis.common;
 
 public class SpringException extends RuntimeException {
     private static final long serialVersionUID = 1L;

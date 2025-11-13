@@ -1,10 +1,9 @@
 package com.example.mybatis.service.impl;
 
-import com.example.mybatis.dto.CourseDTO;
 import com.example.mybatis.entity.Course;
 import com.example.mybatis.mapper.CourseMapper;
 import com.example.mybatis.service.CourseService;
-import com.example.mybatis.exception.SpringException;
+import com.example.mybatis.common.SpringException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Course Service 实现类
