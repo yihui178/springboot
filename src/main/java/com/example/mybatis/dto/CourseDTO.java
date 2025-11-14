@@ -1,5 +1,6 @@
 package com.example.mybatis.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -29,6 +30,4 @@ public class CourseDTO {
     @Schema(description = "亮点数组（表单提交）")
     private List<String> highlights;
 
-    @Schema(description = "数据库中存储的亮点字符串（逗号分隔）")
-    private String highlightStr;
 }

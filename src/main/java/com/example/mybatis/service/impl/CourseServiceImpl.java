@@ -60,9 +60,6 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
      */
     public boolean updateCourse(Course course) {
         try {
-            if (course.getHighlights() != null && !course.getHighlights().isEmpty()) {
-                course.setHighlightStr(String.join(",", course.getHighlights()));
-            }
             return this.updateById(course);
         } catch (Exception e) {
             throw new SpringException("更新课程失败: " + e.getMessage(), 500, e);

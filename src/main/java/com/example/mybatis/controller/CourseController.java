@@ -47,8 +47,10 @@ public class CourseController {
         // Entity -> DTO
         List<CourseDTO> dtoList = pi.getList().stream().map(c -> {
             CourseDTO dto = new CourseDTO();
-            BeanUtils.copyProperties(c, dto); // 会把 highlightStr 一起拷贝
-            // highlights 字段已在 entity.setHighlightStr() 中处理（如果你需要，手动拆分）
+            BeanUtils.copyProperties(c, dto);
+            if (c.getHighlightStr() != null) {
+                dto.setHighlights(List.of(c.getHighlightStr().split(",")));
+            }
             return dto;
         }).collect(Collectors.toList());
 
@@ -89,7 +91,14 @@ public class CourseController {
     public HttpResult<?> update(@RequestBody CourseDTO dto) {
         Course course = new Course();
         BeanUtils.copyProperties(dto, course);
-        // service 层会同步 highlights -> highlightStr
+
+        // highlights -> highlightStr
+        if (dto.getHighlights() != null && !dto.getHighlights().isEmpty()) {
+            course.setHighlightStr(String.join(",", dto.getHighlights()));
+        } else {
+            course.setHighlightStr(null);
+        }
+
         boolean ok = courseService.updateCourse(course);
         return ok ? HttpResult.ok("更新成功") : HttpResult.error(500, "更新失败");
     }
