@@ -195,6 +195,13 @@
             <version>1.4.7</version>
         </dependency>
 
+        <!-- 只引入加密工具：spring-security-crypto （包含 BCryptPasswordEncoder） -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>6.2.0</version>
+        </dependency>
+
     </dependencies>
     <repositories>
 
