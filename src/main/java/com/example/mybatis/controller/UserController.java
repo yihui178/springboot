@@ -1,18 +1,16 @@
 package com.example.mybatis.controller;
 
-import com.example.mybatis.common.CheckParamUtils;
+import com.example.mybatis.utils.CheckParamUtils;
 import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.entity.User;
-import com.example.mybatis.http.HttpResult;
+import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**

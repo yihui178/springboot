@@ -1,6 +1,5 @@
 package com.example.mybatis.common;
 
-import com.example.mybatis.http.HttpResult;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

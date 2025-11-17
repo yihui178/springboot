@@ -1,7 +1,6 @@
-package com.example.mybatis.http;
+package com.example.mybatis.common;
 
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 
 //@Data
 //public class HttpResult {
@@ -37,8 +36,6 @@ import org.springframework.http.HttpStatus;
 //    }
 //}
 
-
-import lombok.Data;
 
 /**
  * 统一接口响应格式（适配 Vben Admin 前端要求）

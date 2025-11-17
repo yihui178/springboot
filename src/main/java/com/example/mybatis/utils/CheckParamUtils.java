@@ -1,4 +1,4 @@
-package com.example.mybatis.common;
+package com.example.mybatis.utils;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;

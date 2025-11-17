@@ -1,4 +1,4 @@
-package com.example.mybatis.common;
+package com.example.mybatis.utils;
 
 import jakarta.servlet.http.HttpServletResponse;
 

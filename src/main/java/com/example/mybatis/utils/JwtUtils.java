@@ -1,4 +1,4 @@
-package com.example.mybatis.common;
+package com.example.mybatis.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

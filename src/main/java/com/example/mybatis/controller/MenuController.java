@@ -1,8 +1,8 @@
 package com.example.mybatis.controller;
 
-import com.example.mybatis.common.JwtUtils;
+import com.example.mybatis.utils.JwtUtils;
 import com.example.mybatis.entity.Permission;
-import com.example.mybatis.http.HttpResult;
+import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.service.PermissionService;
 import com.example.mybatis.service.RolePermissionService;
 import com.example.mybatis.service.UserRoleService;

@@ -1,4 +1,4 @@
-package com.example.mybatis.common;
+package com.example.mybatis.utils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.Workbook;

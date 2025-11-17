@@ -2,7 +2,7 @@ package com.example.mybatis.controller;
 
 import com.example.mybatis.dto.CourseDTO;
 import com.example.mybatis.entity.Course;
-import com.example.mybatis.http.HttpResult;
+import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.service.impl.CourseServiceImpl;
 import com.github.pagehelper.PageInfo;
 import io.swagger.v3.oas.annotations.Operation;
