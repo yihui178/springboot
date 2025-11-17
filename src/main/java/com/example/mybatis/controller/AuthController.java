@@ -4,24 +4,26 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.entity.User;
-import com.example.mybatis.http.HttpResult;
+import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.service.*;
+import com.example.mybatis.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.mybatis.entity.Permission;
-import com.example.mybatis.common.*;
 
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 
 
-
+@Slf4j
 @RestController
 public class AuthController {
 
@@ -43,6 +45,9 @@ public class AuthController {
 
     @Autowired
     private RolePermissionService rolePermissionService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/auth/login")
     public HttpResult<Map<String, Object>> login(@RequestBody Map<String, String> loginForm) {
@@ -68,7 +73,7 @@ public class AuthController {
         if (user == null) {
             return HttpResult.error(401, "账号不存在");
         }
-        if (!Objects.equals(user.getPassword(), password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             return HttpResult.error(401, "账号或密码错误");
         }
 
@@ -270,7 +275,8 @@ public class AuthController {
             // 4. 构造用户对象（适配现有数据库字段）
             User newUser = new User();
             newUser.setName(username); // 前端username对应数据库name字段
-            newUser.setPassword(password); // 明文存储（按需求）
+//            newUser.setPassword(password); // 明文存储（按需求）
+            newUser.setPassword(passwordEncoder.encode(password)); // 存储 BCrypt 密文
             newUser.setAge(18); // 默认年龄（前端未传）
             newUser.setEmail(username + "@example.com"); // 默认邮箱
             newUser.setRole("user"); // 注册用户默认user角色

@@ -2,22 +2,16 @@ package com.example.mybatis.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.context.AnalysisContext;
-import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.mybatis.common.FileUtils;
-import com.example.mybatis.common.PoiUtils;
+import com.example.mybatis.utils.FileUtils;
+import com.example.mybatis.utils.PoiUtils;
 import com.example.mybatis.entity.User;
 import com.example.mybatis.mapper.UserMapper;
 import com.example.mybatis.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.Row;
@@ -25,13 +19,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +35,8 @@ import java.util.concurrent.Executors;
 @RestController
 public class UserExcelController {
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private final UserService userService;
     @Autowired
@@ -166,7 +162,7 @@ public class UserExcelController {
         ExecutorService executorService = Executors.newFixedThreadPool(4); // 可调整线程数
         CompletableFuture.runAsync(() -> {
             try {
-                EasyExcel.read(file.getInputStream(), User.class, new UserExcelListener(userService))
+                EasyExcel.read(file.getInputStream(), User.class, new UserExcelListener(userService,passwordEncoder))
                         .sheet()
                         .doRead();
             } catch (Exception e) {
