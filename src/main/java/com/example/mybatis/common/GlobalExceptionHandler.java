@@ -2,8 +2,8 @@ package com.example.mybatis.common;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,11 +17,7 @@ import java.sql.SQLException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-
-/**
- * 全局异常处理
- */
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -37,28 +33,25 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理参数校验异常（@Valid 注解校验失败）
+     * 🔥 处理参数校验异常（@Valid 注解校验失败）
+     * 优化版：返回更友好的错误提示
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public HttpResult<Map<String, Object>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("参数校验异常: {}", e.getMessage(), e);
+    public HttpResult handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("参数校验异常: {}", e.getMessage());
         BindingResult bindingResult = e.getBindingResult();
 
-        // 1. 收集所有字段校验错误（字段名 → 错误信息）
+        // 收集所有字段错误信息
         Map<String, String> errorMap = new HashMap<>();
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
             errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
-        // 2. 构造返回数据：包含错误码、错误信息、错误详情（适配 Vben 前端解析）
-        Map<String, Object> resultData = new HashMap<>();
-        resultData.put("code", HttpStatus.BAD_REQUEST.value()); // 400：参数错误码
-        resultData.put("message", "参数校验失败"); // 错误提示
-        resultData.put("errorDetails", errorMap); // 字段错误详情（供前端渲染表单提示）
+        // 🔥 拼接所有错误信息（适配前端 ElMessage 展示）
+        String errorMessage = errorMap.values().stream()
+                .collect(Collectors.joining("；"));
 
-        // 3. 调用 HttpResult 标准方法：用 ok(T data) 携带错误数据，code 已在 resultData 中标识
-        // 注意：标准 HttpResult 的 ok 方法会默认设 code=0，需前端通过 resultData 中的 code 判断失败
-        return HttpResult.ok(resultData);
+        return HttpResult.error(HttpStatus.BAD_REQUEST.value(), errorMessage);
     }
 
     /**
@@ -78,10 +71,9 @@ public class GlobalExceptionHandler {
     public HttpResult handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         log.error("参数类型不匹配: {}", e.getMessage(), e);
         String message = String.format(
-                "参数 %s 类型不匹配，期望类型: %s，实际值: %s",
+                "参数 %s 类型不匹配，期望类型: %s",
                 e.getName(),
-                e.getRequiredType().getSimpleName(),
-                e.getValue()
+                e.getRequiredType().getSimpleName()
         );
         return HttpResult.error(HttpStatus.BAD_REQUEST.value(), message);
     }
@@ -102,9 +94,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SQLException.class)
     public HttpResult handleSQLException(SQLException e) {
         log.error("数据库异常: {}", e.getMessage(), e);
-        // 生产环境可根据实际情况返回更友好的信息，避免暴露数据库细节
-        String message = "数据库操作失败，请联系管理员";
-        return HttpResult.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
+        return HttpResult.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "数据库操作失败，请联系管理员");
     }
 
     /**
@@ -113,28 +103,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IOException.class)
     public HttpResult handleIOException(IOException e) {
         log.error("IO异常: {}", e.getMessage(), e);
-        String message = "文件操作失败，请检查文件是否存在或有权限";
-        return HttpResult.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
+        return HttpResult.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "文件操作失败，请检查文件是否存在或有权限");
     }
 
-//    /**
-//     * 处理参数校验异常
-//     */
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    public HttpResult handleIllegalArgumentException(IllegalArgumentException e) {
-//        log.error("参数校验异常: {}", e.getMessage(), e);
-////        String message = "文件操作失败，请检查文件是否存在或有权限";
-//        return HttpResult.error(HttpStatus.BAD_REQUEST.value(), e.getMessage());
-//    }
-
-    // 处理JWT过期异常
+    /**
+     * 🔥 处理JWT过期异常（统一返回格式）
+     */
     @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException e) {
-        // 返回401状态码，让前端知道需要刷新令牌
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("Token expired, please refresh");
+    public HttpResult handleExpiredJwtException(ExpiredJwtException e) {
+        log.error("JWT令牌已过期: {}", e.getMessage());
+        return HttpResult.error(HttpStatus.UNAUTHORIZED.value(), "令牌已过期，请重新登录");
     }
 
+    /**
+     * 🔥 处理唯一约束冲突（如 name 唯一）
+     */
+    @ExceptionHandler({DataIntegrityViolationException.class, org.springframework.dao.DuplicateKeyException.class})
+    public HttpResult handleDuplicateKeyException(Exception e) {
+        log.error("唯一约束冲突: {}", e.getMessage());
+
+        // 🔥 智能识别错误类型
+        String message = "操作失败：数据重复";
+        if (e.getMessage().contains("highlight")) {
+            message = "亮点名称重复，请修改后重试";
+        } else if (e.getMessage().contains("course")) {
+            message = "课程名称重复，请修改后重试";
+        }
+
+        return HttpResult.error(409, message);
+    }
 
     /**
      * 处理其他未知异常

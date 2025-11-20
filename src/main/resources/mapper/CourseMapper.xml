@@ -11,12 +11,12 @@
         <result property="category" column="category"/>
         <result property="description" column="description"/>
         <result property="online" column="online"/>
-        <result property="highlightStr" column="highlight_str"/>
+
     </resultMap>
 
     <!-- 根据关键字查询（用于 PageHelper 分页） -->
     <select id="selectByKeyword" resultMap="CourseResultMap" parameterType="java.lang.String">
-        SELECT id, course_name, category, description, online, highlight_str
+        SELECT id, course_name, category, description, online
         FROM course
         <where>
             <if test="keyword != null and keyword.trim() != ''">
@@ -25,5 +25,28 @@
             </if>
         </where>
     </select>
+    <select id="selectHighlightsByCourseId" resultType="com.example.mybatis.entity.Highlight">
+        SELECT h.* FROM highlight h
+                            JOIN course_highlight ch ON ch.highlight_id = h.id
+        WHERE ch.course_id = #{courseId}
+    </select>
 
+    <insert id="insertCourseHighlight">
+        INSERT INTO course_highlight(course_id, highlight_id)
+        VALUES (#{courseId}, #{highlightId})
+    </insert>
+
+    <delete id="deleteHighlightsByCourseId">
+        DELETE FROM course_highlight WHERE course_id = #{courseId}
+    </delete>
+
+    <select id="selectHighlightsByCourseIds" resultType="map">
+        SELECT ch.course_id, h.id, h.name
+        FROM course_highlight ch
+        JOIN highlight h ON ch.highlight_id = h.id
+        WHERE ch.course_id IN
+        <foreach collection="courseIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>
