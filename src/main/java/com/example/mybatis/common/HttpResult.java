@@ -2,41 +2,6 @@ package com.example.mybatis.common;
 
 import lombok.Data;
 
-//@Data
-//public class HttpResult {
-//    private int code;
-//    private String msg;
-//    private Object data;
-//
-//    // 成功响应
-//    public static HttpResult ok() {
-//        return ok(null);
-//    }
-//
-//    public static HttpResult ok(Object data) {
-//        HttpResult result = new HttpResult();
-//        result.setCode(0);
-//        result.setMsg("操作成功");
-//        result.setData(data);
-//        return result;
-//    }
-//
-//    // 错误响应
-//    public static HttpResult error(int code, String msg) {
-//
-//        return error(code == 0 ? -1 : code, msg, null);
-//    }
-
-//    public static HttpResult error(int code, String msg, Object data) {
-//        HttpResult result = new HttpResult();
-//        result.setCode(code);
-//        result.setMsg(msg);
-//        result.setData(data);
-//        return result;
-//    }
-//}
-
-
 /**
  * 统一接口响应格式（适配 Vben Admin 前端要求）
  */
