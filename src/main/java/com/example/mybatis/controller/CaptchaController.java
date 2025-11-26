@@ -4,18 +4,21 @@ import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * 生成和校验行为验证码（滑块 / 点选验证码）。
+ * @author yihui
  */
 @RestController
 @RequestMapping("/captcha")
 public class CaptchaController {
 
-    @Autowired
-    private CaptchaService captchaService;
+    private final CaptchaService captchaService;
+
+    public CaptchaController(CaptchaService captchaService) {
+        this.captchaService = captchaService;
+    }
 
     @PostMapping("/get")
     public ResponseModel get(@RequestBody CaptchaVO data, HttpServletRequest request) {

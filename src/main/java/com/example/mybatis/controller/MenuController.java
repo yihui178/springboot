@@ -8,7 +8,6 @@ import com.example.mybatis.service.RolePermissionService;
 import com.example.mybatis.service.UserRoleService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -16,24 +15,28 @@ import java.util.*;
 /**
  * Vben Admin 菜单接口控制器
  * 自动识别 BasicLayout / IFrameView / 外链
+ * @author yihui
  */
 @RestController
 @RequestMapping("/menu")
 public class MenuController {
 
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @Autowired
-    private UserRoleService userRoleService;
-
-    @Autowired
-    private RolePermissionService rolePermissionService;
-
-    @Autowired
-    private PermissionService permissionService;
-
     private static final ObjectMapper JSON = new ObjectMapper();
+    private final JwtUtils jwtUtils;
+    private final UserRoleService userRoleService;
+    private final RolePermissionService rolePermissionService;
+    private final PermissionService permissionService;
+    //  构造器注入（多个参数）
+    public MenuController(
+            JwtUtils jwtUtils,
+            UserRoleService userRoleService,
+            RolePermissionService rolePermissionService,
+            PermissionService permissionService) {
+        this.jwtUtils = jwtUtils;
+        this.userRoleService = userRoleService;
+        this.rolePermissionService = rolePermissionService;
+        this.permissionService = permissionService;
+    }
 
     /** 获取菜单树（Vben 兼容格式） */
     @GetMapping("/all")

@@ -5,19 +5,23 @@ import com.example.mybatis.service.HighlightService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 /**
  * 亮点管理控制器（优化版）
  * 职责：仅负责接收请求和返回响应
+ * @author yihui
  */
 @RestController
 @RequestMapping("/highlight")
 @Tag(name = "亮点管理", description = "亮点的增删改查接口")
 public class HighlightController {
-    @Autowired
-    private HighlightService highlightService;
+
+    private final HighlightService highlightService;
+
+    public HighlightController(HighlightService highlightService) {
+        this.highlightService = highlightService;
+    }
     /**
      * 查询所有亮点
      */

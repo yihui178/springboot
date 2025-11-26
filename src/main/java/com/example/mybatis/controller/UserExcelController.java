@@ -18,7 +18,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,29 +31,37 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
+/**
+ * @author yihui
+ */
 @RestController
 public class UserExcelController {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private final UserService userService;
-    @Autowired
-    private UserMapper userMapper;
-
-    public UserExcelController(UserService userService) {
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    //  构造器注入（多个参数）
+    public UserExcelController(
+            UserService userService,
+            UserMapper userMapper,
+            PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
-
     @Tag(name = "Excel导出接口", description = "提供excel下载")
     @Operation(summary = "提供excel下载")
     @PostMapping(value = "/exportExcelUser")
     public void exportExcelUser(HttpServletResponse res) {
         // 使用 User 类而非 SysUser
-        List<User> records = userService.list(); // 获取所有用户数据
-        Workbook workbook = new XSSFWorkbook(); // 创建一个新的 Excel 工作簿
-        Sheet sheet = workbook.createSheet(); // 创建一个新的工作表
-        Row row0 = sheet.createRow(0); // 创建表头
+        // 获取所有用户数据
+        List<User> records = userService.list();
+        // 创建一个新的 Excel 工作簿
+        Workbook workbook = new XSSFWorkbook();
+        // 创建一个新的工作表
+        Sheet sheet = workbook.createSheet();
+        // 创建表头
+        Row row0 = sheet.createRow(0);
 
         // 创建表头
         int columnIndex = 0;
@@ -68,10 +75,13 @@ public class UserExcelController {
 
         // 填充数据
         for (int i = 0; i < records.size(); i++) {
-            User user = records.get(i); // 使用 User 对象
-            Row row = sheet.createRow(i + 1); // 创建每一行数据
+            // 使用 User 对象
+            User user = records.get(i);
+            // 创建每一行数据
+            Row row = sheet.createRow(i + 1);
             columnIndex = 0;
-            row.createCell(columnIndex).setCellValue(i + 1); // 设置序号
+            // 设置序号
+            row.createCell(columnIndex).setCellValue(i + 1);
             row.createCell(++columnIndex).setCellValue(user.getId());
             row.createCell(++columnIndex).setCellValue(user.getName());
             row.createCell(++columnIndex).setCellValue(user.getPassword());
@@ -101,7 +111,8 @@ public class UserExcelController {
             excelWriter = EasyExcel.write(response.getOutputStream(), User.class).build();
 
             int page = 1;
-            int pageSize = 500000; // 每个sheet最多写50万行，防止超出上限
+            // 每个sheet最多写50万行，防止超出上限
+            int pageSize = 500000;
             int sheetNo = 0;
 
             while (true) {

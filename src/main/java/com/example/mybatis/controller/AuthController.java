@@ -4,7 +4,6 @@ import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +14,11 @@ import java.util.Map;
 @Slf4j
 @RestController
 public class AuthController {
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+    // ✅ 构造器注入（单个参数可省略 @Autowired）
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
     /**
      * 用户登录
      */
