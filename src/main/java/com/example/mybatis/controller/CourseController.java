@@ -7,16 +7,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
 /**
- * 课程管理控制器（优化版）
- * 职责：仅负责接收请求和返回响应
+ * 课程管理控制器（精简版）
+ * @author yihui
  */
 @RestController
 @RequestMapping("/course")
 @Tag(name = "课程管理", description = "课程的增删改查与分页接口")
 public class CourseController {
     private final CourseService courseService;
-
     public CourseController(CourseService courseService) {
         this.courseService = courseService;
     }
@@ -29,9 +29,7 @@ public class CourseController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "5") Integer pageSize,
             @RequestParam(required = false) String keyword) {
-
-        PageInfo<CourseDTO> pageInfo = courseService.pageCoursesWithDTO(page, pageSize, keyword);
-        return HttpResult.ok(pageInfo);
+        return HttpResult.ok(courseService.pageCoursesWithDTO(page, pageSize, keyword));
     }
     /**
      * 新增课程
@@ -39,8 +37,7 @@ public class CourseController {
     @PostMapping("/add")
     @Operation(summary = "新增课程")
     public HttpResult<String> add(@Valid @RequestBody CourseDTO dto) {
-        courseService.addCourse(dto);
-        return HttpResult.ok("新增成功");
+        return courseService.addCourse(dto);
     }
     /**
      * 更新课程
@@ -48,8 +45,7 @@ public class CourseController {
     @PutMapping("/update")
     @Operation(summary = "更新课程")
     public HttpResult<String> update(@Valid @RequestBody CourseDTO dto) {
-        courseService.updateCourse(dto);
-        return HttpResult.ok("更新成功");
+        return courseService.updateCourse(dto);
     }
     /**
      * 删除课程
@@ -57,7 +53,6 @@ public class CourseController {
     @PostMapping("/delete")
     @Operation(summary = "删除课程")
     public HttpResult<String> delete(@RequestBody CourseDTO dto) {
-        courseService.deleteCourse(dto.getId());
-        return HttpResult.ok("删除成功");
+        return courseService.deleteCourse(dto.getId());
     }
 }
