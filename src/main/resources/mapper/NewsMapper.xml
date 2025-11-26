@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mapper.NewsMapper">
+    <resultMap id="NewsResultMap" type="com.example.mybatis.entity.News">
+        <id property="id" column="id"/>
+        <result property="newsName" column="news_name"/>
+        <result property="newsContent" column="news_content"/>
+        <result property="newsCategory" column="news_category"/>
+        <result property="newsDescription" column="news_description"/>
+        <result property="hasImage" column="has_image"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="newsTags" column="news_tags"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <!-- 根据关键词和分类查询 -->
+    <select id="selectByKeywordAndCategory" resultMap="NewsResultMap">
+        SELECT * FROM news
+        WHERE deleted = 0
+        <if test="keyword != null and keyword.trim() != ''">
+            AND (
+            news_name LIKE CONCAT('%', #{keyword}, '%')
+            OR news_content LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="category != null and category.trim() != ''">
+            AND FIND_IN_SET(#{category}, news_category) > 0
+        </if>
+        ORDER BY create_time DESC
+    </select>
+</mapper>
