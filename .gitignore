@@ -19,6 +19,13 @@ target/
 *.iml
 *.ipr
 
+# ✅ 重点：忽略包含敏感信息的配置文件
+application-dev.yml
+application-prod.yml
+application-local.yml
+application.yml
+*-secret.yml
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

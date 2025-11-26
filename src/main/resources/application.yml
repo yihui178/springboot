@@ -1,9 +1,17 @@
+aliyun:
+    oss:
+        endpoint: oss-cn-beijing.aliyuncs.com
+        access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID:default-key}
+        access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:default-secret}
+        bucket-name: ${ALIYUN_OSS_BUCKET_NAME:default-bucket}
+        cdn-domain: ${ALIYUN_OSS_CDN_DOMAIN:}
+
 jwt:
     secret: ${JWT_SECRET:replace_with_real_secret_at_deploy_time_1234567890_abcdefg}
     expire-ms: 3600000  # Token有效期(毫秒)：1小时
 aj:
     captcha:
-#        type: blockPuzzle       # 验证码类型: blockPuzzle(滑块) 或 clickWord(文字点选)
+        #        type: blockPuzzle       # 验证码类型: blockPuzzle(滑块) 或 clickWord(文字点选)
         cache-type: local       # 缓存类型: local/redis
         expire-seconds: 120     # 验证码有效时间(秒)
         water-mark: '水印'   # 可选
@@ -12,6 +20,8 @@ aj:
 #        puzzle-base-dir: classpath:images/puzzle/
 
 spring:
+    profiles:
+        active: dev
     servlet:
         multipart:
             max-file-size: 10MB
