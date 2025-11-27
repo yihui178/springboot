@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * Course Mapper 接口 — 自定义 SQL 在 mapper XML 中实现
+ * @author yihui
  */
 @Mapper
 public interface CourseMapper extends BaseMapper<Course> {

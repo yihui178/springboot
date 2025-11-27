@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @TableName("highlight")
 public class Highlight {
-    @TableId(value ="id",type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
     private String name;
 

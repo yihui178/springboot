@@ -3,8 +3,7 @@ package com.example.mybatis.mapper;
 import com.example.mybatis.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Update;
+
 
 /**
  * <p>
@@ -16,9 +15,5 @@ import org.apache.ibatis.annotations.Update;
  */
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
-
-    @Update("ALTER TABLE user AUTO_INCREMENT = #{nextId}")
-    void updateAutoIncrement(@Param("nextId") Long nextId);
-
 }
 

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @TableName("news")
 public class News {
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
     @TableField("news_name")
     private String newsName;

@@ -1,5 +1,7 @@
 package com.example.mybatis.entity;
 
+import com.alibaba.excel.annotation.write.style.ColumnWidth;
+import com.alibaba.excel.converters.longconverter.LongStringConverter;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -28,10 +30,11 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 主键ID
+     * 主键ID（导出时转为文本，避免精度丢失）
      */
-    @ExcelProperty("id")
-    @TableId(value ="id",type = IdType.AUTO)
+    @ExcelProperty(value = "用户ID", converter = LongStringConverter.class)
+    @ColumnWidth(20) // 设置列宽
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
 
     /**

@@ -14,7 +14,7 @@ import java.util.List;
 @TableName("course")
 public class Course {
 
-    @TableId(value ="id",type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
     private String courseName;
     private String category;

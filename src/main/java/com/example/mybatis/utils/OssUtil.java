@@ -43,8 +43,8 @@ public class OssUtil {
             }
 
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String dateFolder = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-            String fileName = folder + "/" + dateFolder + "/" + UUID.randomUUID() + extension;
+//            String  = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+            String fileName = folder + "/" + UUID.randomUUID() + extension;
 
             // 2. 设置文件元信息
             ObjectMetadata metadata = new ObjectMetadata();

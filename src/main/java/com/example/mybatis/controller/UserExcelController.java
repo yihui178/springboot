@@ -5,6 +5,8 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.mybatis.service.impl.RoleServiceImpl;
+import com.example.mybatis.service.impl.UserRoleServiceImpl;
 import com.example.mybatis.utils.FileUtils;
 import com.example.mybatis.utils.PoiUtils;
 import com.example.mybatis.entity.User;
@@ -40,14 +42,19 @@ public class UserExcelController {
     private final UserService userService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserRoleServiceImpl userRoleService;
+    private final RoleServiceImpl roleService;
+
     //  构造器注入（多个参数）
     public UserExcelController(
             UserService userService,
             UserMapper userMapper,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, UserRoleServiceImpl userRoleService, RoleServiceImpl roleService) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.userRoleService = userRoleService;
+        this.roleService = roleService;
     }
     @Tag(name = "Excel导出接口", description = "提供excel下载")
     @Operation(summary = "提供excel下载")
@@ -155,48 +162,19 @@ public class UserExcelController {
     @Tag(name = "Excel导入接口", description = "异步导入用户数据")
     @Operation(summary = "异步上传 Excel 文件导入用户")
     @PostMapping(value = "/importUsers", consumes = "multipart/form-data")
-    public String importUsers(
-            @Parameter(description = "Excel 文件", required = true)
-            @RequestPart("file") MultipartFile file) throws Exception {
-
-        //  第1步：重置自增主键
-        Long maxId = userService.lambdaQuery()
-                .select(User::getId)
-                .orderByDesc(User::getId)
-                .last("LIMIT 1")
-                .oneOpt()
-                .map(User::getId)
-                .orElse(0L);
-        userMapper.updateAutoIncrement(maxId + 1);
-
-        //  第2步：异步执行导入任务
-        ExecutorService executorService = Executors.newFixedThreadPool(4); // 可调整线程数
+    public String importUsers(@RequestPart("file") MultipartFile file) throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
         CompletableFuture.runAsync(() -> {
             try {
-                EasyExcel.read(file.getInputStream(), User.class, new UserExcelListener(userService,passwordEncoder))
+                EasyExcel.read(file.getInputStream(), User.class,
+                                // ✅ 传入所有依赖
+                                new UserExcelListener(userService, passwordEncoder, userRoleService, roleService))
                         .sheet()
                         .doRead();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }, executorService);
-
-        // 不等待导入完成，直接返回响应
         return "导入任务已开始，请稍后查看结果。";
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
