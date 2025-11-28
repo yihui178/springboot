@@ -41,7 +41,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public HttpResult<Void> handleValidationException(MethodArgumentNotValidException e) {
         log.warn("参数校验失败: {}", e.getMessage());
-
         BindingResult bindingResult = e.getBindingResult();
         String errorMessage = bindingResult.getFieldErrors()
                 .stream()
@@ -66,11 +65,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public HttpResult<Void> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         log.warn("参数类型不匹配: {} -> {}", e.getName(), e.getValue());
-
         String requiredType = e.getRequiredType() != null
                 ? e.getRequiredType().getSimpleName()
                 : "未知类型";
-
         return HttpResult.error(
                 HttpStatus.BAD_REQUEST.value(),
                 String.format("参数 %s 类型不匹配，期望类型: %s", e.getName(), requiredType)
@@ -82,7 +79,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ExpiredJwtException.class)
     public HttpResult<Void> handleExpiredJwt(ExpiredJwtException e) {
-        log.warn("JWT令牌已过期");
+        log.warn("JWT令牌已过期: {}", e.getMessage());
         return HttpResult.error(HttpStatus.UNAUTHORIZED.value(), "令牌已过期，请重新登录");
     }
     // ==================== 数据库异常 ====================
@@ -93,7 +90,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({DataIntegrityViolationException.class, DuplicateKeyException.class})
     public HttpResult<Void> handleDuplicateKey(Exception e) {
         log.error("数据库唯一约束冲突: {}", e.getMessage());
-
         String message = parseConstraintMessage(e.getMessage());
         return HttpResult.error(HttpStatus.CONFLICT.value(), message);
     }
@@ -101,7 +97,7 @@ public class GlobalExceptionHandler {
      * 处理 SQL 异常
      */
     @ExceptionHandler(SQLException.class)
-    public HttpResult<Void> handleSQLException(SQLException e) {
+    public HttpResult<Void> handleSqlException(SQLException e) {
         log.error("数据库异常: SQLState={}, ErrorCode={}", e.getSQLState(), e.getErrorCode(), e);
         return HttpResult.error(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -124,7 +120,7 @@ public class GlobalExceptionHandler {
      * 处理 IO 异常
      */
     @ExceptionHandler(IOException.class)
-    public HttpResult<Void> handleIOException(IOException e) {
+    public HttpResult<Void> handleIoException(IOException e) {
         log.error("IO异常: {}", e.getMessage(), e);
         return HttpResult.error(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -153,28 +149,29 @@ public class GlobalExceptionHandler {
         }
         String lowerMsg = errorMessage.toLowerCase();
         // ✅ 只处理真正有唯一约束的字段
-        if (lowerMsg.contains("user")) {
-            if (lowerMsg.contains("name") || lowerMsg.contains("uk_name") || lowerMsg.contains("ux_user_name")) {
-                return "用户名已存在，请更换其他用户名";
-            }
-        } else if (lowerMsg.contains("role")) {
-            if (lowerMsg.contains("code")) {
-                return "角色代码已存在，请修改后重试";
-            }
-        } else if (lowerMsg.contains("permission")) {
-            if (lowerMsg.contains("code")) {
-                return "权限代码已存在，请修改后重试";
-            }
-        } else if (lowerMsg.contains("highlight")) {
-            if (lowerMsg.contains("name")) {
-                return "亮点名称重复，请修改后重试";
-            }
-        } else if (lowerMsg.contains("duplicate entry")) {
+        if (lowerMsg.contains("user") &&
+                (lowerMsg.contains("name") || lowerMsg.contains("uk_name") || lowerMsg.contains("ux_user_name"))) {
+            return "用户名已存在，请更换其他用户名";
+        }
+
+        if (lowerMsg.contains("role") && lowerMsg.contains("code")) {
+            return "角色代码已存在，请修改后重试";
+        }
+
+        if (lowerMsg.contains("permission") && lowerMsg.contains("code")) {
+            return "权限代码已存在，请修改后重试";
+        }
+
+        if (lowerMsg.contains("highlight") && lowerMsg.contains("name")) {
+            return "亮点名称重复，请修改后重试";
+        }
+
+        if (lowerMsg.contains("duplicate entry")) {
             // 通用兜底：提取重复值
             String duplicateValue = extractDuplicateValue(errorMessage);
-            return duplicateValue != null
-                    ? String.format("数据重复：%s 已存在", duplicateValue)
-                    : "操作失败：数据重复";
+            if (duplicateValue != null) {
+                return String.format("数据重复：%s 已存在", duplicateValue);
+            }
         }
         return "操作失败：数据重复";
     }
@@ -189,8 +186,8 @@ public class GlobalExceptionHandler {
             if (start > 0 && end > start) {
                 return errorMessage.substring(start, end);
             }
-        } catch (Exception ignored) {
-            // 忽略解析异常
+        } catch (Exception e) {
+            log.debug("解析重复值失败: {}", errorMessage, e);
         }
         return null;
     }

@@ -9,6 +9,7 @@ import com.example.mybatis.mapper.CourseMapper;
 import com.example.mybatis.service.CourseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +22,11 @@ import java.util.stream.Collectors;
  * @author yihui
  */
 @Service
+@RequiredArgsConstructor
 public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> implements CourseService {
+
     private final CourseMapper courseMapper;
-    public CourseServiceImpl(CourseMapper courseMapper) {
-        this.courseMapper = courseMapper;
-    }
+
     // ========== 查询操作 ==========
     @Override
     public PageInfo<CourseDTO> pageCoursesWithDTO(int page, int pageSize, String keyword) {
@@ -132,10 +133,6 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         return HttpResult.ok("删除成功");
     }
     // ========== 辅助方法 ==========
-    @Override
-    public List<Highlight> getHighlightsByCourseId(Long courseId) {
-        return courseMapper.selectHighlightsByCourseId(courseId);
-    }
     @Override
     public Map<Long, List<Long>> getHighlightsByCourseIds(List<Long> courseIds) {
         if (courseIds == null || courseIds.isEmpty()) {

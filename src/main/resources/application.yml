@@ -13,7 +13,6 @@ aj:
     captcha:
         #        type: blockPuzzle       # 验证码类型: blockPuzzle(滑块) 或 clickWord(文字点选)
         cache-type: local       # 缓存类型: local/redis
-        expire-seconds: 120     # 验证码有效时间(秒)
         water-mark: '水印'   # 可选
         interference-options: '2'  # 干扰项
         font-type: '宋体'          # 字体（可选）

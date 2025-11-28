@@ -18,13 +18,11 @@ public interface CourseMapper extends BaseMapper<Course> {
 
     List<Course> selectByKeyword(@Param("keyword") String keyword);
 
-    // 新增的 亮点关联操作
+    // 亮点关联操作
     void deleteHighlightsByCourseId(@Param("courseId") Long courseId);
 
     void insertCourseHighlight(@Param("courseId") Long courseId,
                                @Param("highlightId") Long highlightId);
 
-    List<Highlight> selectHighlightsByCourseId(@Param("courseId") Long courseId);
-    // CourseMapper.java
     List<Map<String, Object>> selectHighlightsByCourseIds(@Param("courseIds") List<Long> courseIds);
 }

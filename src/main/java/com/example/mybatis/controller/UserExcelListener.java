@@ -7,6 +7,7 @@ import com.example.mybatis.entity.UserRole;
 import com.example.mybatis.service.RoleService;
 import com.example.mybatis.service.UserRoleService;
 import com.example.mybatis.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -15,31 +16,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+/**
+ * @author yihui
+ */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserExcelListener implements ReadListener<User> {
     private static final int BATCH_COUNT = 5000;
     private final List<User> cachedDataList = new ArrayList<>(BATCH_COUNT);
     private final Set<String> excelNameSet = new HashSet<>();
+
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final UserRoleService userRoleService;
     private final RoleService roleService;
-    public UserExcelListener(UserService userService,
-                             PasswordEncoder passwordEncoder,
-                             UserRoleService userRoleService,
-                             RoleService roleService) {
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-        this.userRoleService = userRoleService;
-        this.roleService = roleService;
-    }
+
     @Override
     public void invoke(User data, AnalysisContext context) {
-        if (data.getName() == null) return;
+        if (data.getName() == null) {return;}
 
         String username = data.getName().trim();
-        if (!excelNameSet.add(username)) return;
+        if (!excelNameSet.add(username)) {return;}
 
         // 密码加密
         String rawPwd = data.getPassword();
@@ -56,10 +54,10 @@ public class UserExcelListener implements ReadListener<User> {
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
         saveData();
-        log.info("✅ Excel 数据导入完成");
+        log.info("Excel 数据导入完成");
     }
     private void saveData() {
-        if (cachedDataList.isEmpty()) return;
+        if (cachedDataList.isEmpty()) {return;}
         // 查询已存在的用户
         List<String> names = cachedDataList.stream().map(User::getName).toList();
         Set<String> exists = userService.lambdaQuery()
@@ -75,7 +73,7 @@ public class UserExcelListener implements ReadListener<User> {
         if (!toSave.isEmpty()) {
             // 保存用户
             userService.saveBatch(toSave, BATCH_COUNT);
-            log.info("✅ 保存 {} 个用户", toSave.size());
+            log.info("保存 {} 个用户", toSave.size());
             // 分配默认角色
             assignDefaultRoleToUsers(toSave);
         }
@@ -87,22 +85,23 @@ public class UserExcelListener implements ReadListener<User> {
                     .eq(Role::getCode, "user")
                     .one();
             if (defaultRole == null) {
-                log.error("❌ 系统未配置默认角色 'user'");
+                log.error("系统未配置默认角色 'user'");
                 return;
             }
             List<UserRole> userRoles = new ArrayList<>();
             for (User user : users) {
-                // ✅ 如果 Excel 中指定了角色，使用指定的角色
+                // 如果 Excel 中指定了角色，使用指定的角色
                 String roleCode = user.getRole();
                 if (roleCode == null || roleCode.trim().isEmpty()) {
-                    roleCode = "user";  // 默认角色
+                    // 默认角色
+                    roleCode = "user";
                 }
                 // 查询角色
                 Role role = roleService.lambdaQuery()
                         .eq(Role::getCode, roleCode)
                         .one();
                 if (role == null) {
-                    log.warn("⚠️ 角色 '{}' 不存在，使用默认角色", roleCode);
+                    log.warn("角色 '{}' 不存在，使用默认角色", roleCode);
                     role = defaultRole;
                 }
                 // 创建用户角色关系
@@ -110,16 +109,16 @@ public class UserExcelListener implements ReadListener<User> {
                 ur.setUserId(user.getId());
                 ur.setRoleId(role.getId());
                 userRoles.add(ur);
-                // ✅ 更新 user.role 字段
+                // 更新 user.role 字段
                 user.setRole(role.getCode());
             }
             // 批量插入 user_role 表
             userRoleService.saveBatch(userRoles, BATCH_COUNT);
-            // ✅ 批量更新 user.role 字段
+            // 批量更新 user.role 字段
             userService.updateBatchById(users, BATCH_COUNT);
-            log.info("✅ 为 {} 个用户分配了角色", users.size());
+            log.info("为 {} 个用户分配了角色", users.size());
         } catch (Exception e) {
-            log.error("❌ 分配角色失败: {}", e.getMessage(), e);
+            log.error("分配角色失败: {}", e.getMessage(), e);
         }
     }
 }

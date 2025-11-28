@@ -4,6 +4,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * @author yihui
+ */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
@@ -11,10 +14,16 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         // 添加映射路径  
         registry.addMapping("/**")
-                .allowedOrigins("*") // 允许哪些域的请求，星号代表允许所有
-                .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE") // 允许的方法  
-                .allowedHeaders("*") // 允许的头部设置  
-                .allowCredentials(false) // 是否发送cookie
-                .maxAge(168000); // 预检间隔时间  
+                // 允许哪些域的请求，星号代表允许所有
+                .allowedOrigins("*")
+                // 允许的方法
+                .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
+                // 允许的头部设置
+                .allowedHeaders("*")
+                // 是否发送cookie
+                .allowCredentials(false)
+                // 预检间隔时间
+                .maxAge(168000);
+
     }
 }

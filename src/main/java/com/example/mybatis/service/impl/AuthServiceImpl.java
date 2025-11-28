@@ -1,5 +1,4 @@
 package com.example.mybatis.service.impl;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.example.mybatis.common.SpringException;
 import com.example.mybatis.dto.UserDTO;
@@ -10,34 +9,29 @@ import com.example.mybatis.entity.UserRole;
 import com.example.mybatis.service.*;
 import com.example.mybatis.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
-import java.util.stream.Collectors;
 /**
  * 认证服务实现类
+ * @author yihui
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private RoleService roleService;
-    @Autowired
-    private PermissionService permissionService;
-    @Autowired
-    private UserRoleService userRoleService;
-    @Autowired
-    private RolePermissionService rolePermissionService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtUtils jwtUtils;
+    // 使用 final 确保不可变性
+    private final UserService userService;
+    private final RoleService roleService;
+    private final PermissionService permissionService;
+    private final UserRoleService userRoleService;
+    private final RolePermissionService rolePermissionService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
     // ========== 公共接口实现 ==========
     /**
      * 用户注册
@@ -173,7 +167,8 @@ public class AuthServiceImpl implements AuthService {
             String timestamp = captchaToken.substring(captchaToken.length() - 13);
             long tokenTime = Long.parseLong(timestamp);
             long currentTime = System.currentTimeMillis();
-            if (currentTime - tokenTime > 300000) { // 5分钟 = 300000ms
+            // 5分钟 = 300000ms
+            if (currentTime - tokenTime > 300000) {
                 throw new SpringException("验证码已过期", 401);
             }
         } catch (NumberFormatException | StringIndexOutOfBoundsException e) {

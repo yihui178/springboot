@@ -3,6 +3,9 @@ package com.example.mybatis.utils;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @author yihui
+ */
 public class CheckParamUtils {
 
     // 检查字符串是否为空

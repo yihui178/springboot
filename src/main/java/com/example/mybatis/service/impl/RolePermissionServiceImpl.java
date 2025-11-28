@@ -4,16 +4,19 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.mybatis.entity.RolePermission;
 import com.example.mybatis.mapper.RolePermissionMapper;
 import com.example.mybatis.service.RolePermissionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author yihui
+ */
 @Service
+@RequiredArgsConstructor
 public class RolePermissionServiceImpl implements RolePermissionService {
 
-    @Autowired
-    private RolePermissionMapper rolePermissionMapper;
+    private final RolePermissionMapper rolePermissionMapper;
 
     @Override
     public List<Long> listPermissionIdsByRoleIds(List<Long> roleIds) {

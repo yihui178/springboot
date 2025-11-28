@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 阿里云 OSS 配置类
+ * @author yihui
  */
 @Data
 @Configuration
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 public class OssConfig {
 
     /**
-     * OSS 服务端点（如：oss-cn-hangzhou.aliyuncs.com）
+     * OSS 服务端点
      */
     private String endpoint;
 

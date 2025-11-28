@@ -7,6 +7,7 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,14 +15,11 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/news")
+@RequiredArgsConstructor
 @Tag(name = "新闻管理", description = "新闻的增删改查与分页接口")
 public class NewsController {
 
     private final NewsService newsService;
-    // 构造器注入（单个参数可省略 @Autowired）
-    public NewsController(NewsService newsService) {
-        this.newsService = newsService;
-    }
 
     @GetMapping("/page")
     @Operation(summary = "分页查询新闻")

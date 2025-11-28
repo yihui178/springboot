@@ -4,6 +4,7 @@ import lombok.Data;
 
 /**
  * 统一接口响应格式（适配 Vben Admin 前端要求）
+ * @author yihui
  */
 @Data
 public class HttpResult<T> {
@@ -34,7 +35,7 @@ public class HttpResult<T> {
         HttpResult<T> result = new HttpResult<>();
         result.setCode(0);
         result.setData(data);
-        result.setMessage(message); // 自定义成功消息
+        result.setMessage(message);
         return result;
     }
 

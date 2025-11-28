@@ -6,6 +6,9 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @author yihui
+ */
 public class FileUtils {
     public static void downloadFile(HttpServletResponse response, File file, String newFileName,boolean deleteAfter) {
         response.setContentType("application/octet-stream");

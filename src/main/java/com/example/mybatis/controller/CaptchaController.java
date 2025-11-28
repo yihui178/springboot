@@ -4,6 +4,7 @@ import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -12,13 +13,10 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/captcha")
+@RequiredArgsConstructor
 public class CaptchaController {
 
     private final CaptchaService captchaService;
-
-    public CaptchaController(CaptchaService captchaService) {
-        this.captchaService = captchaService;
-    }
 
     @PostMapping("/get")
     public ResponseModel get(@RequestBody CaptchaVO data, HttpServletRequest request) {

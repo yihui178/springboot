@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,12 +15,12 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/course")
+@RequiredArgsConstructor
 @Tag(name = "课程管理", description = "课程的增删改查与分页接口")
 public class CourseController {
+
     private final CourseService courseService;
-    public CourseController(CourseService courseService) {
-        this.courseService = courseService;
-    }
+
     /**
      * 分页查询课程
      */

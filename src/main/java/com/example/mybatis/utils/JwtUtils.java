@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * Jwt 工具类：统一生成与解析 Token
+ * @author yihui
  */
 @Component
 public class JwtUtils {
@@ -55,8 +56,12 @@ public class JwtUtils {
     public Long parseUserId(String token) {
         Claims c = parseClaims(token);
         Object v = c.get("userId");
-        if (v instanceof Number) return ((Number) v).longValue();
-        if (v instanceof String) return Long.valueOf((String) v);
+        if (v instanceof Number) {
+            return ((Number) v).longValue();
+        }
+        if (v instanceof String) {
+            return Long.valueOf((String) v);
+        }
         return null;
     }
 }

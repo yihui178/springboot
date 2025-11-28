@@ -4,6 +4,9 @@ import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * @author yihui
+ */
 @Data
 public class HighlightDTO {
     private Long id;

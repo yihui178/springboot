@@ -3,6 +3,7 @@ import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -10,15 +11,14 @@ import java.util.Map;
 /**
  * 认证控制器（极简版）
  * 职责：仅负责接收请求和返回响应
+ * @author yihui
  */
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 public class AuthController {
+
     private final AuthService authService;
-    // ✅ 构造器注入（单个参数可省略 @Autowired）
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
     /**
      * 用户登录
      */
@@ -53,9 +53,9 @@ public class AuthController {
      * 用户注册
      */
     @PostMapping("/auth/register")
-    public HttpResult<Void> register(@RequestBody Map<String, Object> registerForm) {
-        authService.register(registerForm);
-        return HttpResult.ok(null, "注册成功，请登录");
+    public HttpResult<UserDTO> register(@RequestBody Map<String, Object> registerForm) {
+        UserDTO user = authService.register(registerForm);
+        return HttpResult.ok(user, "注册成功，请登录");
     }
     /**
      * 验证滑块验证码

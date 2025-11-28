@@ -1,6 +1,5 @@
 package com.example.mybatis.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.mybatis.entity.User;
 import com.example.mybatis.mapper.UserMapper;
 import com.example.mybatis.service.UserService;

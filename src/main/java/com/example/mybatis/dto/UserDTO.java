@@ -3,6 +3,9 @@ package com.example.mybatis.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+/**
+ * @author yihui
+ */
 @Data
 @Schema(description = "用户数据传输对象")
 public class UserDTO {

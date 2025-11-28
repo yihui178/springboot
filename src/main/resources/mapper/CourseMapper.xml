@@ -25,11 +25,6 @@
             </if>
         </where>
     </select>
-    <select id="selectHighlightsByCourseId" resultType="com.example.mybatis.entity.Highlight">
-        SELECT h.* FROM highlight h
-                            JOIN course_highlight ch ON ch.highlight_id = h.id
-        WHERE ch.course_id = #{courseId}
-    </select>
 
     <insert id="insertCourseHighlight">
         INSERT INTO course_highlight(course_id, highlight_id)

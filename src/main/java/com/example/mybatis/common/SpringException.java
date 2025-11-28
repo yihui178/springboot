@@ -1,6 +1,17 @@
 package com.example.mybatis.common;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serial;
+
+/**
+ * @author yihui
+ */
+@Setter
+@Getter
 public class SpringException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = 1L;
     private String msg;
     private int code = 500;
@@ -27,19 +38,4 @@ public class SpringException extends RuntimeException {
         this.code = code;
     }
 
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
 }

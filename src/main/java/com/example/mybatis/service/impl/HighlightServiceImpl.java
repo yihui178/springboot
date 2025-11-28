@@ -6,6 +6,7 @@ import com.example.mybatis.dto.HighlightDTO;
 import com.example.mybatis.entity.Highlight;
 import com.example.mybatis.mapper.HighlightMapper;
 import com.example.mybatis.service.HighlightService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +17,12 @@ import java.util.stream.Collectors;
  * @author yihui
  */
 @Service
+@RequiredArgsConstructor
 public class HighlightServiceImpl extends ServiceImpl<HighlightMapper, Highlight>
         implements HighlightService {
+
     private final HighlightMapper highlightMapper;
-    public HighlightServiceImpl(HighlightMapper highlightMapper) {
-        this.highlightMapper = highlightMapper;
-    }
+
     @Override
     public List<HighlightDTO> listAllHighlights() {
         try {

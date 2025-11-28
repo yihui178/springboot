@@ -10,6 +10,7 @@ import com.example.mybatis.service.NewsService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +24,10 @@ import java.util.stream.Collectors;
  * @author yihui
  */
 @Service
+@RequiredArgsConstructor
 public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements NewsService {
 
     private final NewsMapper newsMapper;
-
-    public NewsServiceImpl(NewsMapper newsMapper) {
-        this.newsMapper = newsMapper;
-    }
 
     /**
      * 分页查询新闻（返回 DTO）

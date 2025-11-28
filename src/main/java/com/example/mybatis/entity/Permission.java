@@ -3,6 +3,9 @@ package com.example.mybatis.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+/**
+ * @author yihui
+ */
 @Data
 @TableName("permission")
 public class Permission {
@@ -11,8 +14,8 @@ public class Permission {
     private String code;
     private String type;
     private String path;
-    private String component;   // ✅ 新增
-    private Long parentId;      // ✅ 新增
+    private String component;
+    private Long parentId;
     private Integer orderNum;
     private String createTime;
     private String icon;

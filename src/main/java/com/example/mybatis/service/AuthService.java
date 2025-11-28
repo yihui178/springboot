@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 /**
  * 认证服务接口
+ * @author yihui
  */
 public interface AuthService {
 

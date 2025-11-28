@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
 import java.util.Collections;
 
+/**
+ * @author yihui
+ */
 public class CodeGenerator {
 
     public static void main(String[] args) {
@@ -23,8 +26,7 @@ public class CodeGenerator {
                             .disableOpenDir(); // 生成后不打开文件夹
                 })
                 // 包配置
-                .packageConfig(builder -> {
-                    builder.parent("com.example.mybatis") // 父包名
+                .packageConfig(builder -> builder.parent("com.example.mybatis")
                             .moduleName("") // 子模块名，无则留空
                             .entity("entity") // 实体类包名
                             .mapper("mapper") // Mapper接口包名
@@ -33,8 +35,7 @@ public class CodeGenerator {
                             .controller("controller") // Controller包名
                             // Mapper XML文件输出路径
                             .pathInfo(Collections.singletonMap(OutputFile.xml,
-                                    System.getProperty("user.dir") + "/src/main/resources/mapper"));
-                })
+                                    System.getProperty("user.dir") + "/src/main/resources/mapper")))
                 // 策略配置
                 .strategyConfig(builder -> {
                     builder.addInclude("user", "role") // 需要生成的表名，多个表用逗号分隔

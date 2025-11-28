@@ -3,7 +3,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.dto.CourseDTO;
 import com.example.mybatis.entity.Course;
-import com.example.mybatis.entity.Highlight;
 import com.github.pagehelper.PageInfo;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +27,6 @@ public interface CourseService extends IService<Course> {
      * 删除课程
      */
     HttpResult<String> deleteCourse(Long courseId);
-    /**
-     * 查询单个课程的亮点
-     */
-    List<Highlight> getHighlightsByCourseId(Long courseId);
     /**
      * 批量查询多个课程的亮点（性能优化）
      */

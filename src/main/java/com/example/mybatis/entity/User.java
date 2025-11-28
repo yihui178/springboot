@@ -8,11 +8,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
-import java.io.Serializable;
 
-import jdk.jfr.Experimental;
-import lombok.Getter;
-import lombok.Setter;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * <p>
@@ -27,6 +25,7 @@ import lombok.Setter;
 @TableName("user")
 public class User implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
