@@ -12,6 +12,7 @@ import com.example.mybatis.entity.User;
 import com.example.mybatis.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 /**
  * 用户 Excel 导入导出控制器
  *
@@ -45,6 +48,7 @@ public class UserExcelController {
     private final PasswordEncoder passwordEncoder;
     private final UserRoleService userRoleService;
     private final RoleService roleService;
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4);
     /**
      * 导出用户数据（POI 方式）
      */
@@ -56,17 +60,18 @@ public class UserExcelController {
         // try-with-resources
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("用户数据");
-
             // 创建表头
             createHeader(sheet);
-
             // 填充数据
             fillData(sheet, records);
-
             // 创建文件并下载
             File file = PoiUtils.createExcelFile(workbook, "download_user");
+            // 检查 file 是否为 null
+            if (file == null) {
+                log.error("创建 Excel 文件失败");
+                throw new RuntimeException("创建 Excel 文件失败，请联系管理员");
+            }
             FileUtils.downloadFile(response, file, file.getName(), true);
-
         } catch (Exception e) {
             log.error("导出用户数据失败", e);
             throw new RuntimeException("导出失败: " + e.getMessage());
@@ -102,8 +107,6 @@ public class UserExcelController {
     @PostMapping(value = "/importUsers", consumes = "multipart/form-data")
     @Operation(summary = "异步导入用户数据")
     public String importUsers(@RequestPart("file") MultipartFile file) {
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
-
         CompletableFuture.runAsync(() -> {
             try {
                 EasyExcel.read(file.getInputStream(), User.class,
@@ -113,14 +116,22 @@ public class UserExcelController {
             } catch (IOException e) {
                 log.error("导入用户数据失败", e);
             }
-        }, executorService);
-
-        // 记得关闭线程池（或使用全局线程池）
-        executorService.shutdown();
+        }, EXECUTOR);
 
         return "导入任务已开始，请稍后查看结果。";
     }
     // ==================== 私有辅助方法 ====================
+    @PreDestroy
+    public void shutdown() {
+        EXECUTOR.shutdown();
+        try {
+            if (!EXECUTOR.awaitTermination(60, TimeUnit.SECONDS)) {
+                EXECUTOR.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            EXECUTOR.shutdownNow();
+        }
+    }
     /**
      * 创建 Excel 表头
      */

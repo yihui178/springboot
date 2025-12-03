@@ -10,6 +10,7 @@ import com.example.mybatis.service.CourseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  * 课程服务实现类
  * @author yihui
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> implements CourseService {
@@ -163,13 +165,23 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         }
         return course;
     }
+    // 使用返回值，记录日志
     private void saveOrUpdateHighlights(Course course) {
         Long courseId = course.getId();
-        courseMapper.deleteHighlightsByCourseId(courseId);
+
+        // 获取删除行数，记录日志
+        int deletedRows = courseMapper.deleteHighlightsByCourseId(courseId);
+        log.info("删除关联: courseId={}, deletedRows={}", courseId, deletedRows);
+
         if (course.getHighlights() != null && !course.getHighlights().isEmpty()) {
+            int successCount = 0;
             for (Highlight highlight : course.getHighlights()) {
-                courseMapper.insertCourseHighlight(courseId, highlight.getId());
+                int inserted = courseMapper.insertCourseHighlight(courseId, highlight.getId());
+                if (inserted > 0) {
+                    successCount++;
+                }
             }
+            log.info("新增关联: courseId={}, successCount={}", courseId, successCount);
         }
     }
 }

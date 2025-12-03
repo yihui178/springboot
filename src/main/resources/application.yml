@@ -7,7 +7,7 @@ aliyun:
         cdn-domain: ${ALIYUN_OSS_CDN_DOMAIN:}
 
 jwt:
-    secret: ${JWT_SECRET:replace_with_real_secret_at_deploy_time_1234567890_abcdefg}
+    secret: ${JWT_SECRET}
     expire-ms: 3600000  # Token有效期(毫秒)：1小时
 aj:
     captcha:
@@ -29,8 +29,8 @@ spring:
         driver-class-name: com.mysql.cj.jdbc.Driver # 指定数据库驱动类
         # 数据库连接信息
         url: jdbc:mysql://127.0.0.1:3306/userdb?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-        username: root # 数据库用户名
-        password: ZdwAT/XxfNY/hT/wPCqa9BIyqAU9gVy2BDQibPkKs4ApUA8T7ln1xy7uKEA7OWAIzSSglgVmILNVBT2l2LGjwA== # 数据库密码
+        username: ${DB_USERNAME:root}
+        password: ${DB_PASSWORD:123456}
         type: com.alibaba.druid.pool.DruidDataSource
         druid: # Druid 连接池
             initial-size: 5 # 初始化连接池大小
@@ -42,7 +42,7 @@ spring:
             min-evictable-idle-time-millis: 300000 # 配置一个连接在连接池中最小生存的时间（单位：毫秒）
             max-evictable-idle-time-millis: 900000 # 配置一个连接在连接池中最大生存的时间（单位：毫秒）
             validation-query: SELECT 1 FROM DUAL # 配置测试连接是否可用的查询 sql
-            connectionProperties: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAI2AHplMIfMAfi3s7w8BOpSLJ8MoJULaLH2QQS5ULBbkrqE6bRjofJwfkJYFvMWaFB1IH9WRO/rZyPrhOJeOPmMCAwEAAQ==
+
             test-on-borrow: false
             test-on-return: false
             pool-prepared-statements: false

@@ -15,13 +15,13 @@ public class CorsConfig implements WebMvcConfigurer {
         // 添加映射路径  
         registry.addMapping("/**")
                 // 允许哪些域的请求，星号代表允许所有
-                .allowedOrigins("*")
+                .allowedOrigins("http://localhost:5777")
                 // 允许的方法
                 .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
                 // 允许的头部设置
                 .allowedHeaders("*")
                 // 是否发送cookie
-                .allowCredentials(false)
+                .allowCredentials(true)
                 // 预检间隔时间
                 .maxAge(168000);
 
