@@ -52,6 +52,11 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- Redis 依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
         <!-- MyBatis-Plus 核心依赖 -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -150,16 +155,16 @@
             <version>2.3.2</version>
         </dependency>
         <!--AJ-Captcha 行为验证码功能-->
-        <dependency>
-            <groupId>com.anji-plus</groupId>
-            <artifactId>captcha-spring-boot-starter</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.anji-plus</groupId>-->
+<!--            <artifactId>captcha-spring-boot-starter</artifactId>-->
+<!--            <version>1.4.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>javax.annotation</groupId>-->
+<!--            <artifactId>javax.annotation-api</artifactId>-->
+<!--            <version>1.3.2</version>-->
+<!--        </dependency>-->
 
         <!--Guava 的 Preconditions 参数校验功能-->
         <dependency>

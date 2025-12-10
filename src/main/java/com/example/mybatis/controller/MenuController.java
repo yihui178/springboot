@@ -1,10 +1,10 @@
 package com.example.mybatis.controller;
-import com.example.mybatis.utils.JwtUtils;
 import com.example.mybatis.entity.Permission;
 import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.service.PermissionService;
 import com.example.mybatis.service.RolePermissionService;
 import com.example.mybatis.service.UserRoleService;
+import com.example.mybatis.utils.RequestUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 /**
  * Vben Admin 菜单接口控制器
- * 自动识别 BasicLayout / IFrameView / 外链
- *
  * @author yihui
  */
 @Slf4j
@@ -23,9 +21,8 @@ import java.util.*;
 @RequestMapping("/menu")
 @RequiredArgsConstructor
 public class MenuController {
-
     private static final ObjectMapper JSON = new ObjectMapper();
-    private final JwtUtils jwtUtils;
+
     private final UserRoleService userRoleService;
     private final RolePermissionService rolePermissionService;
     private final PermissionService permissionService;
@@ -35,25 +32,24 @@ public class MenuController {
     @GetMapping("/all")
     public HttpResult<List<Map<String, Object>>> getAllMenus(HttpServletRequest request) {
         try {
-            Long userId = getUserIdFromToken(request);
-            if (userId == null) {
-                return HttpResult.error(401, "Token 无效或缺失");
-            }
-            // 用户角色 → 权限ID → 菜单
+            // 使用工具类获取 userId
+            Long userId = RequestUtils.getCurrentUserId(request);
+            // 查询用户角色
             List<Long> roleIds = userRoleService.listRoleIdsByUserId(userId);
             if (roleIds.isEmpty()) {
                 return HttpResult.ok(Collections.emptyList());
             }
-
+            // 查询角色权限
             List<Long> permIds = rolePermissionService.listPermissionIdsByRoleIds(roleIds);
             if (permIds.isEmpty()) {
                 return HttpResult.ok(Collections.emptyList());
             }
+            // 过滤菜单权限
             List<Permission> perms = permissionService.listByIds(permIds).stream()
                     .filter(p -> "menu".equalsIgnoreCase(p.getType()))
                     .sorted(Comparator.comparingInt(Permission::getOrderNum))
                     .toList();
-            // ID → Node 映射
+            // 构建节点映射
             Map<Long, Map<String, Object>> nodeMap = new LinkedHashMap<>();
             for (Permission p : perms) {
                 nodeMap.put(p.getId(), buildNode(p));
@@ -133,12 +129,9 @@ public class MenuController {
         if (extraStr == null || extraStr.isBlank()) {
             return extra;
         }
-
         try {
             if (extraStr.startsWith("{")) {
-                // ✅ 修复未检查的赋值警告
-                extra = JSON.readValue(extraStr,
-                        new TypeReference<>() {});
+                extra = JSON.readValue(extraStr, new TypeReference<>() {});
             } else if (extraStr.startsWith("redirect:")) {
                 extra.put("redirect", extraStr.substring("redirect:".length()));
             }
@@ -146,17 +139,6 @@ public class MenuController {
             log.warn("解析 extra 失败: {}", extraStr, e);
         }
         return extra;
-    }
-    /**
-     * 提取 Bearer Token 中的 userId
-     */
-    private Long getUserIdFromToken(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
-            return null;
-        }
-        String token = header.substring(7);
-        return jwtUtils.parseUserId(token);
     }
     /**
      * 去除字符串开头的斜杠

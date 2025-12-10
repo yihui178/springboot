@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @SpringBootApplication
 
-@ComponentScan(basePackages = {"com.example.mybatis", "com.anji.captcha"})
+//@ComponentScan(basePackages = {"com.example.mybatis", "com.anji.captcha"})
 public class MybatisApplication {
 
     public static void main(String[] args) {
