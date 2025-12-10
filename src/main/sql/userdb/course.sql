@@ -1,0 +1,10 @@
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (3, 'Python 数据分析', '数据科学', '学习 pandas、numpy、matplotlib 等库进行数据处理与分析。', 1, '老师教学生动');
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (4, 'MySQL 数据库设计', '数据科学', '掌握数据库设计原则、索引优化和 SQL 实战技巧。', 1, '老师教学生动,个人爱好');
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1001, '新手骑行入门培训', '新手入门', '适合刚拿驾照的新手，包含基础操作、起步刹车、安全知识、道路规则等内容。包含理论课程和实操训练。', 0, null);
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1002, '进阶骑行技巧提升', '进阶技巧', '适合有一定骑行经验的骑友。包含弯道技巧、紧急避险、高速骑行、雨天骑行等高级技术训练。', 0, null);
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1003, '摩托车日常保养维修', '保养维修', '教你自己动手进行日常保养：换机油、清洗链条、调整刹车、更换火花塞等基础维修技能。', 0, null);
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1004, '安全骑行意识培训', '安全培训', '防御性驾驶理念、事故案例分析、应急处理技巧、装备选择等安全知识。支持线上学习。', 1, null);
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1005, '山路弯道专项训练', '进阶技巧', '专注山路弯道技术：压弯技巧、视线管理、油门控制、重心转移等。封闭场地实操训练。', 0, null);
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1006, '长途骑行准备课程', '骑行技巧', '长途骑行前的准备工作：路线规划、装备检查、体能准备、应急预案、团队协作等。', 1, null);
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1007, '摩托车驾驶证考试辅导', '新手入门', '针对摩托车驾照考试的专项辅导，包含科目二科目三的技巧讲解和模拟练习。', 0, null);
+INSERT INTO userdb.course (id, course_name, category, description, online, highlight_str) VALUES (1008, '越野骑行技术培训', '越野技巧', '越野摩托车骑行技术：站姿骑行、跳跃技巧、泥地控制、陡坡攀爬等专业训练。', 0, null);

@@ -1,0 +1,12 @@
+INSERT INTO userdb.highlight (id, name) VALUES (5, '免费复训');
+INSERT INTO userdb.highlight (id, name) VALUES (4, '包教包会');
+INSERT INTO userdb.highlight (id, name) VALUES (3, '实操为主');
+INSERT INTO userdb.highlight (id, name) VALUES (1, '小班教学');
+INSERT INTO userdb.highlight (id, name) VALUES (51, '快速见效');
+INSERT INTO userdb.highlight (id, name) VALUES (7, '提供训练车辆');
+INSERT INTO userdb.highlight (id, name) VALUES (10, '真实路况训练');
+INSERT INTO userdb.highlight (id, name) VALUES (6, '线上线下结合');
+INSERT INTO userdb.highlight (id, name) VALUES (9, '终身会员福利');
+INSERT INTO userdb.highlight (id, name) VALUES (8, '证书认证');
+INSERT INTO userdb.highlight (id, name) VALUES (2, '资深教练');
+INSERT INTO userdb.highlight (id, name) VALUES (52, '适合人群广');
