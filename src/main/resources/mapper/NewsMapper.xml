@@ -29,6 +29,6 @@
         <if test="category != null and category.trim() != ''">
             AND FIND_IN_SET(#{category}, news_category) > 0
         </if>
-        ORDER BY create_time DESC
+        ORDER BY create_time DESC, id DESC
     </select>
 </mapper>

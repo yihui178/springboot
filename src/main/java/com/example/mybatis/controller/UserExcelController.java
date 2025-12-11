@@ -4,6 +4,7 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.service.RoleService;
 import com.example.mybatis.service.UserRoleService;
 import com.example.mybatis.utils.FileUtils;
@@ -106,19 +107,30 @@ public class UserExcelController {
      */
     @PostMapping(value = "/importUsers", consumes = "multipart/form-data")
     @Operation(summary = "异步导入用户数据")
-    public String importUsers(@RequestPart("file") MultipartFile file) {
+    public HttpResult<String> importUsers(@RequestPart("file") MultipartFile file) {
+        // 校验文件
+        if (file.isEmpty()) {
+            return HttpResult.error(400, "文件不能为空");
+        }
+        // 校验文件类型
+        String filename = file.getOriginalFilename();
+        if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls"))) {
+            return HttpResult.error(400, "只支持 Excel 文件（.xlsx 或 .xls）");
+        }
+        // 异步导入
         CompletableFuture.runAsync(() -> {
             try {
                 EasyExcel.read(file.getInputStream(), User.class,
                                 new UserExcelListener(userService, passwordEncoder, userRoleService, roleService))
                         .sheet()
                         .doRead();
+                log.info("用户数据导入完成");
             } catch (IOException e) {
                 log.error("导入用户数据失败", e);
             }
         }, EXECUTOR);
-
-        return "导入任务已开始，请稍后查看结果。";
+        // 🔥 返回标准格式
+        return HttpResult.ok("导入任务已开始，请稍后查看结果");
     }
     // ==================== 私有辅助方法 ====================
     @PreDestroy
