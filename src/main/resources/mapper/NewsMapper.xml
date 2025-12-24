@@ -15,9 +15,30 @@
         <result property="deleted" column="deleted"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
+        <!-- ✅ 新增字段 -->
+        <result property="status" column="status"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creatorName" column="creator_name"/>
     </resultMap>
-    <!-- 根据关键词和分类查询 -->
+
+    <!-- 普通用户/会员查询（只看已通过的） -->
     <select id="selectByKeywordAndCategory" resultMap="NewsResultMap">
+        SELECT * FROM news
+        WHERE deleted = 0 AND status = 'approved'
+        <if test="keyword != null and keyword.trim() != ''">
+            AND (
+            news_name LIKE CONCAT('%', #{keyword}, '%')
+            OR news_content LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="category != null and category.trim() != ''">
+            AND FIND_IN_SET(#{category}, news_category) > 0
+        </if>
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+    <!-- ✅ 管理员查询（可看所有状态） -->
+    <select id="selectAllForAdmin" resultMap="NewsResultMap">
         SELECT * FROM news
         WHERE deleted = 0
         <if test="keyword != null and keyword.trim() != ''">
@@ -29,6 +50,11 @@
         <if test="category != null and category.trim() != ''">
             AND FIND_IN_SET(#{category}, news_category) > 0
         </if>
-        ORDER BY create_time DESC, id DESC
+        <if test="status != null and status.trim() != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY
+        FIELD(status, 'pending', 'approved', 'rejected'),
+        create_time DESC, id DESC
     </select>
 </mapper>

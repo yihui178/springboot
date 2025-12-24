@@ -38,4 +38,14 @@ public class NewsDTO {
     private List<String> newsTags;
     @Schema(description = "是否已删除")
     private Boolean deleted;
+
+
+    @Schema(description = "审核状态")
+    private String status;
+
+    @Schema(description = "创建者ID")
+    private Long creatorId;
+
+    @Schema(description = "创建者姓名")
+    private String creatorName;
 }

@@ -12,14 +12,19 @@ import com.github.pagehelper.PageInfo;
  */
 public interface NewsService extends IService<News> {
     /**
-     * 分页查询新闻（返回 DTO）
+     * 分页查询新闻（普通用户/会员）
      */
     PageInfo<NewsDTO> pageNewsWithDTO(int page, int pageSize, String keyword, String category);
 
     /**
-     * 新增新闻
+     * ✅ 管理员分页查询
      */
-    HttpResult<String> addNews(NewsDTO dto);
+    PageInfo<NewsDTO> pageNewsForAdmin(int page, int pageSize, String keyword, String category, String status);
+
+    /**
+     * ✅ 新增新闻（会员和管理员）
+     */
+    HttpResult<String> addNews(NewsDTO dto, Long userId, boolean isAdmin);
 
     /**
      * 更新新闻
@@ -27,7 +32,12 @@ public interface NewsService extends IService<News> {
     HttpResult<String> updateNews(NewsDTO dto);
 
     /**
-     * 删除新闻（逻辑删除）
+     * 删除新闻
      */
     HttpResult<String> deleteNews(Long newsId);
+
+    /**
+     * ✅ 审核动态
+     */
+    HttpResult<String> reviewNews(Long newsId, String action);
 }

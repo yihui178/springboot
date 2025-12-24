@@ -33,4 +33,10 @@ public class News {
     private LocalDateTime createTime;
     @TableField("update_time")
     private LocalDateTime updateTime;
+    @TableField("status")
+    private String status; // pending, approved, rejected
+    @TableField("creator_id")
+    private Long creatorId;
+    @TableField("creator_name")
+    private String creatorName;
 }

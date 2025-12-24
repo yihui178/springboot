@@ -1,12 +1,13 @@
 package com.example.mybatis.service.impl;
-
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.common.SpringException;
 import com.example.mybatis.dto.NewsDTO;
 import com.example.mybatis.entity.News;
+import com.example.mybatis.entity.User;
 import com.example.mybatis.mapper.NewsMapper;
 import com.example.mybatis.service.NewsService;
+import com.example.mybatis.service.UserService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -14,61 +15,78 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-/**
- * @author yihui
- */
 @Service
 @RequiredArgsConstructor
 public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements NewsService {
-
     private final NewsMapper newsMapper;
-
-    /**
-     * 分页查询新闻（返回 DTO）
-     */
+    private final UserService userService; // ✅ 添加
     @Override
     public PageInfo<NewsDTO> pageNewsWithDTO(int page, int pageSize, String keyword, String category) {
         try {
-            // 使用 try-with-resources 管理 Page 资源
             try (Page<Object> ignored = PageHelper.startPage(page, pageSize)) {
                 List<News> newsList = newsMapper.selectByKeywordAndCategory(keyword, category);
                 PageInfo<News> newsPageInfo = new PageInfo<>(newsList);
-
-                // 边界处理：如果新闻列表为空
                 if (newsList.isEmpty()) {
                     return createEmptyPageInfo(newsPageInfo);
                 }
-
-                // 转换为 DTO 并封装分页结果
                 return convertToPageInfo(newsPageInfo);
             }
         } catch (Exception e) {
             throw new SpringException("查询新闻分页失败: " + e.getMessage(), 500, e);
         }
     }
-
-    /**
-     * 新增新闻
-     */
+    // ✅ 新增：管理员分页查询
+    @Override
+    public PageInfo<NewsDTO> pageNewsForAdmin(int page, int pageSize, String keyword, String category, String status) {
+        try {
+            try (Page<Object> ignored = PageHelper.startPage(page, pageSize)) {
+                List<News> newsList = newsMapper.selectAllForAdmin(keyword, category, status);
+                PageInfo<News> newsPageInfo = new PageInfo<>(newsList);
+                if (newsList.isEmpty()) {
+                    return createEmptyPageInfo(newsPageInfo);
+                }
+                return convertToPageInfo(newsPageInfo);
+            }
+        } catch (Exception e) {
+            throw new SpringException("查询新闻分页失败: " + e.getMessage(), 500, e);
+        }
+    }
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public HttpResult<String> addNews(NewsDTO dto) {
-        validateNewsDTO(dto);
+    public HttpResult<String> addNews(NewsDTO dto, Long userId, boolean isAdmin) {
+        validateNewsDTO(dto); // ✅ 添加校验
+
         News news = convertToEntity(dto);
+        User creator = userService.getById(userId);
+        news.setCreatorId(userId);
+        news.setCreatorName(creator.getName());
+        news.setStatus(isAdmin ? "approved" : "pending");
         news.setDeleted(false);
         this.save(news);
-        return HttpResult.ok("新增成功");
+        return HttpResult.ok(isAdmin ? "发布成功" : "提交成功，请等待审核");
     }
+    @Override
+    @Transactional(rollbackFor = Exception.class) // ✅ 添加事务
+    public HttpResult<String> reviewNews(Long newsId, String action) {
+        News news = this.getById(newsId);
 
-    /**
-     * 更新新闻
-     */
+        // ✅ 添加空值检查
+        if (news == null || news.getDeleted()) {
+            throw new SpringException("动态不存在", 404);
+        }
+
+        if (!"pending".equals(news.getStatus())) {
+            return HttpResult.error(400, "该动态已审核");
+        }
+
+        news.setStatus("approve".equals(action) ? "approved" : "rejected");
+        this.updateById(news);
+        return HttpResult.ok("审核成功");
+    }
     @Override
     @Transactional(rollbackFor = Exception.class)
     public HttpResult<String> updateNews(NewsDTO dto) {
@@ -85,10 +103,6 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
         this.updateById(news);
         return HttpResult.ok("更新成功");
     }
-
-    /**
-     * 删除新闻（逻辑删除）
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public HttpResult<String> deleteNews(Long newsId) {
@@ -96,19 +110,17 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
             throw new SpringException("新闻ID不能为空", 400);
         }
         News existingNews = this.getById(newsId);
-        if (existingNews == null || existingNews.getDeleted()) {
+        if (existingNews == null) {
             throw new SpringException("新闻不存在", 404);
         }
-        existingNews.setDeleted(true);
-        this.updateById(existingNews);
+//        逻辑删除
+//        existingNews.setDeleted(true);
+//        this.updateById(existingNews);
+        //改为物理删除（直接从数据库删除记录）
+        this.removeById(newsId);
         return HttpResult.ok("删除成功");
     }
-
     // ========== 私有辅助方法 ==========
-
-    /**
-     * 创建空分页结果
-     */
     private PageInfo<NewsDTO> createEmptyPageInfo(PageInfo<News> newsPageInfo) {
         PageInfo<NewsDTO> emptyPage = new PageInfo<>();
         emptyPage.setList(Collections.emptyList());
@@ -118,15 +130,10 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
         emptyPage.setPages(newsPageInfo.getPages());
         return emptyPage;
     }
-
-    /**
-     * 转换分页数据
-     */
     private PageInfo<NewsDTO> convertToPageInfo(PageInfo<News> newsPageInfo) {
         List<NewsDTO> dtoList = newsPageInfo.getList().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-
         PageInfo<NewsDTO> dtoPage = new PageInfo<>();
         dtoPage.setList(dtoList);
         dtoPage.setPageNum(newsPageInfo.getPageNum());
@@ -135,10 +142,6 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
         dtoPage.setPages(newsPageInfo.getPages());
         return dtoPage;
     }
-
-    /**
-     * 参数校验
-     */
     private void validateNewsDTO(NewsDTO dto) {
         if (dto.getNewsName() == null || dto.getNewsName().trim().isEmpty()) {
             throw new SpringException("新闻名称不能为空", 400);
@@ -165,48 +168,33 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News> implements Ne
             throw new SpringException("新闻标签不能为空", 400);
         }
     }
-
-    /**
-     * Entity 转 DTO
-     */
     private NewsDTO convertToDTO(News news) {
         NewsDTO dto = new NewsDTO();
         BeanUtils.copyProperties(news, dto);
-
         if (news.getNewsCategory() != null && !news.getNewsCategory().isEmpty()) {
             dto.setNewsCategory(Arrays.asList(news.getNewsCategory().split(",")));
         } else {
             dto.setNewsCategory(Collections.emptyList());
         }
-
         if (news.getNewsTags() != null && !news.getNewsTags().isEmpty()) {
             dto.setNewsTags(Arrays.asList(news.getNewsTags().split(",")));
         } else {
             dto.setNewsTags(Collections.emptyList());
         }
-
         return dto;
     }
-
-    /**
-     * DTO 转 Entity
-     */
     private News convertToEntity(NewsDTO dto) {
         News news = new News();
         BeanUtils.copyProperties(dto, news);
-
         if (dto.getNewsCategory() != null && !dto.getNewsCategory().isEmpty()) {
             news.setNewsCategory(String.join(",", dto.getNewsCategory()));
         }
-
         if (dto.getNewsTags() != null && !dto.getNewsTags().isEmpty()) {
             news.setNewsTags(String.join(",", dto.getNewsTags()));
         }
-
         if (Boolean.FALSE.equals(dto.getHasImage())) {
             news.setImageUrl("");
         }
-
         return news;
     }
 }
