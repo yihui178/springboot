@@ -160,9 +160,12 @@ public class AuthServiceImpl implements AuthService {
         List<Long> permIds = rolePermissionService.listPermissionIdsByRoleIds(roleIds);
         // 过滤按钮权限
         return permissionService.listByIds(permIds).stream()
-                .filter(p -> "button".equalsIgnoreCase(p.getType()))
+                .filter(p -> ("button".equalsIgnoreCase(p.getType())
+                        || "menu".equalsIgnoreCase(p.getType()))
+                        && p.getCode() != null
+                        && !p.getCode().isEmpty())
                 .map(Permission::getCode)
-                .filter(Objects::nonNull)
+                .distinct()
                 .toList();
     }
     @Override
