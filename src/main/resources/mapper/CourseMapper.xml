@@ -4,19 +4,36 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mybatis.mapper.CourseMapper">
 
-    <!-- resultMap 可以用来映射 highlight_str 到 highlightStr 字段  -->
+    <!-- resultMap 可以用来映射字段 -->
     <resultMap id="CourseResultMap" type="com.example.mybatis.entity.Course">
         <id property="id" column="id"/>
         <result property="courseName" column="course_name"/>
         <result property="category" column="category"/>
         <result property="description" column="description"/>
         <result property="online" column="online"/>
-
+        <result property="scheduleTime" column="schedule_time"/>
+        <result property="duration" column="duration"/>
+        <result property="instructor" column="instructor"/>
+        <result property="location" column="location"/>
+        <!-- ✅ 新增字段映射 -->
+        <result property="maxStudents" column="max_students"/>
+        <result property="contactPhone" column="contact_phone"/>
     </resultMap>
 
     <!-- 根据关键字查询（用于 PageHelper 分页） -->
     <select id="selectByKeyword" resultMap="CourseResultMap" parameterType="java.lang.String">
-        SELECT id, course_name, category, description, online
+        SELECT
+        id,
+        course_name,
+        category,
+        description,
+        online,
+        schedule_time,
+        duration,
+        instructor,
+        location,
+        max_students,
+        contact_phone
         FROM course
         <where>
             <if test="keyword != null and keyword.trim() != ''">

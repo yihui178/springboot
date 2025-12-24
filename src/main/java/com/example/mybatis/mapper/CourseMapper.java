@@ -13,7 +13,7 @@ import java.util.Map;
  * @author yihui
  */
 @Mapper
-public interface CourseMapper extends BaseMapper<Course> {
+public interface  CourseMapper extends BaseMapper<Course> {
 
     List<Course> selectByKeyword(@Param("keyword") String keyword);
 
