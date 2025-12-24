@@ -2,13 +2,17 @@ package com.example.mybatis.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.mybatis.service.MemberService;
+import com.example.mybatis.entity.Member;
 import com.example.mybatis.utils.CheckParamUtils;
 import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.entity.User;
 import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.service.UserService;
+import com.example.mybatis.utils.RequestUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +32,7 @@ import java.util.stream.Collectors;
 public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final MemberService memberService;
     /**
      * 分页查询用户
      */
@@ -213,6 +218,56 @@ public class UserController {
             return HttpResult.error(500, "删除失败");
         }
     }
+
+    /**
+     * 获取所有用户列表（用于会员管理选择用户）
+     */
+    @GetMapping("/list-for-member")
+    @Operation(summary = "获取用户列表（用于会员管理）")
+    public HttpResult<List<Map<String, Object>>> listForMember() {
+        // 查询所有用户
+        List<User> users = userService.list();
+
+        // 查询已经是会员的用户ID
+        List<Long> memberUserIds = memberService.list()
+                .stream()
+                .map(Member::getUserId)
+                .toList();
+
+        // 转换为简化的DTO（排除已是会员的用户）
+        List<Map<String, Object>> result = users.stream()
+                .filter(user -> !memberUserIds.contains(user.getId()))
+                .map(user -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", user.getId());
+                    map.put("name", user.getName());
+                    map.put("email", user.getEmail());
+                    return map;
+                })
+                .toList();
+
+        return HttpResult.ok(result);
+    }
+
+    /**
+     * 检查当前用户是否为会员
+     */
+    @GetMapping("/is-member")
+    @Operation(summary = "检查当前用户是否为会员")
+    public HttpResult<Boolean> isMember(HttpServletRequest request) {
+        try {
+            Long userId = RequestUtils.getCurrentUserIdSafely(request);
+            if (userId == null) {
+                return HttpResult.ok(false);
+            }
+            // 调用带缓存的方法（不再直接查询）
+            Boolean isMember = userService.isMember(userId);
+            return HttpResult.ok(isMember);
+        } catch (Exception e) {
+            return HttpResult.ok(false);
+        }
+    }
+
     // ==================== 私有辅助方法 ====================
 
     /**
