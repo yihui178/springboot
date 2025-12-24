@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mapper.MemberMapper">
+
+    <resultMap id="MemberResultMap" type="com.example.mybatis.entity.Member">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="memberName" column="member_name"/>
+        <result property="phone" column="phone"/>
+        <result property="idCard" column="id_card"/>
+        <result property="gender" column="gender"/>
+        <result property="joinDate" column="join_date"/>
+        <result property="motorcycleBrand" column="motorcycle_brand"/>
+        <result property="motorcycleModel" column="motorcycle_model"/>
+        <result property="plateNumber" column="plate_number"/>
+        <result property="address" column="address"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 根据关键词查询（用于 PageHelper 分页） -->
+    <select id="selectByKeyword" resultMap="MemberResultMap" parameterType="java.lang.String">
+        SELECT * FROM member
+        <where>
+            <if test="keyword != null and keyword.trim() != ''">
+                (member_name LIKE CONCAT('%', #{keyword}, '%')
+                OR phone LIKE CONCAT('%', #{keyword}, '%')
+                OR plate_number LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+</mapper>
