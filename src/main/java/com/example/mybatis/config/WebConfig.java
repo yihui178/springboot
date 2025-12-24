@@ -25,7 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/druid/**",             // Druid监控
                         "/swagger-ui/**",        // Swagger
                         "/v3/api-docs/**",
-                        "/test/**"              //测试接口（生产环境需删除）
+                        "/test/**",           //测试接口（生产环境需删除）
+                        "/migration/**"
                 );
     }
 }
