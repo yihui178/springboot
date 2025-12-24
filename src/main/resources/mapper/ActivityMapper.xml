@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mapper.ActivityMapper">
+
+    <resultMap id="ActivityResultMap" type="com.example.mybatis.entity.Activity">
+        <id property="id" column="id"/>
+        <result property="activityName" column="activity_name"/>
+        <result property="activityType" column="activity_type"/>
+        <result property="description" column="description"/>
+        <result property="startTime" column="start_time"/>
+        <result property="location" column="location"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="currentParticipants" column="current_participants"/>
+        <result property="contactPerson" column="contact_person"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!-- ✅ 添加 course_id 字段映射 -->
+        <result property="courseId" column="course_id"/>
+    </resultMap>
+
+    <!-- 根据关键词查询（用于 PageHelper 分页） -->
+    <select id="selectByKeyword" resultMap="ActivityResultMap" parameterType="java.lang.String">
+        SELECT
+        id,
+        activity_name,
+        activity_type,
+        description,
+        start_time,
+        location,
+        max_participants,
+        current_participants,
+        contact_person,
+        contact_phone,
+        create_time,
+        update_time,
+        course_id
+        FROM activity
+        <where>
+            <if test="keyword != null and keyword.trim() != ''">
+                (activity_name LIKE CONCAT('%', #{keyword}, '%')
+                OR description LIKE CONCAT('%', #{keyword}, '%')
+                OR location LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY start_time DESC
+    </select>
+</mapper>
