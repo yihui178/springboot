@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mapper.ActivityEnrollmentMapper">
+
+    <!-- ✅ 移除原来的 resultMap，直接返回 DTO -->
+
+    <!-- 根据活动ID查询报名列表（返回 DTO） -->
+    <select id="selectByActivityId" resultType="com.example.mybatis.dto.ActivityEnrollmentDTO">
+        SELECT
+            ae.id,
+            ae.activity_id AS activityId,
+            ae.member_id AS memberId,
+            ae.member_name AS memberName,
+            ae.member_phone AS memberPhone,
+            ae.enrollment_status AS enrollmentStatus,
+            ae.enrollment_time AS enrollmentTime,
+            ae.remark,
+            ae.create_time AS createTime,
+            ae.update_time AS updateTime,
+            ae.enrollment_type AS enrollmentType,
+            ae.course_id AS courseId,
+            c.course_name AS courseName
+        FROM activity_enrollment ae
+                 LEFT JOIN course c ON ae.course_id = c.id
+        WHERE ae.activity_id = #{activityId}
+        ORDER BY ae.enrollment_time DESC
+    </select>
+
+    <!-- 根据会员ID查询报名列表（返回 DTO） -->
+    <select id="selectByMemberId" resultType="com.example.mybatis.dto.ActivityEnrollmentDTO">
+        SELECT
+            ae.id,
+            ae.activity_id AS activityId,
+            ae.member_id AS memberId,
+            ae.member_name AS memberName,
+            ae.member_phone AS memberPhone,
+            ae.enrollment_status AS enrollmentStatus,
+            ae.enrollment_time AS enrollmentTime,
+            ae.remark,
+            ae.create_time AS createTime,
+            ae.update_time AS updateTime,
+            ae.enrollment_type AS enrollmentType,
+            ae.course_id AS courseId,
+            c.course_name AS courseName
+        FROM activity_enrollment ae
+                 LEFT JOIN course c ON ae.course_id = c.id
+        WHERE ae.member_id = #{memberId}
+        ORDER BY ae.enrollment_time DESC
+    </select>
+</mapper>
