@@ -261,7 +261,7 @@ public class UserController {
                 return HttpResult.ok(false);
             }
             // 调用带缓存的方法（不再直接查询）
-            Boolean isMember = userService.isMember(userId);
+            Boolean isMember = memberService.isUserMember(userId);
             return HttpResult.ok(isMember);
         } catch (Exception e) {
             return HttpResult.ok(false);

@@ -28,4 +28,11 @@ public interface MemberService extends IService<Member> {
      * 删除会员
      */
     HttpResult<String> deleteMember(Long memberId);
+
+    /**
+     * 检查用户是否为会员（带缓存）
+     * @param userId 用户ID
+     * @return true=是会员，false=不是会员
+     */
+    Boolean isUserMember(Long userId);
 }
