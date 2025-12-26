@@ -74,11 +74,11 @@ public class GlobalExceptionHandler {
         log.error("IO异常: {}", e.getMessage(), e);
         return HttpResult.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "文件操作失败，请检查文件是否存在或有权限");
     }
-    @ExceptionHandler(Exception.class)
-    public HttpResult<Void> handleException(Exception e) {
-        log.error("未知异常: ", e);
-        return HttpResult.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "系统发生了未知错误，请联系管理员");
-    }
+//    @ExceptionHandler(Exception.class)
+//    public HttpResult<Void> handleException(Exception e) {
+//        log.error("未知异常: ", e);
+//        return HttpResult.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "系统发生了未知错误，请联系管理员");
+//    }
     // ==================== 私有辅助方法 ====================
     private String parseConstraintMessage(String errorMessage) {
         if (errorMessage == null) {

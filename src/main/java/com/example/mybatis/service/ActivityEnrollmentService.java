@@ -25,7 +25,7 @@ public interface ActivityEnrollmentService extends IService<ActivityEnrollment> 
     /**
      * 取消报名
      */
-    HttpResult<String> cancelEnrollment(Long enrollmentId);
+//    HttpResult<String> cancelEnrollment(Long enrollmentId);
 
     /**
      * 获取活动的报名列表
