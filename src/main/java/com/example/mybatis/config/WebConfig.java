@@ -26,7 +26,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/swagger-ui/**",        // Swagger
                         "/v3/api-docs/**",
                         "/test/**",           //测试接口（生产环境需删除）
-                        "/migration/**"
-                );
+                        "/migration/**",
+                        "/notification/sse"
+                        );
     }
 }

@@ -1,6 +1,7 @@
 package com.example.mybatis.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.example.mybatis.common.SpringException;
+import com.example.mybatis.controller.NotificationController;
 import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.entity.Permission;
 import com.example.mybatis.entity.Role;
@@ -31,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final RolePermissionService rolePermissionService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final NotificationController notificationController;
     // ========== 公开接口实现 ==========
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -184,11 +186,15 @@ public class AuthServiceImpl implements AuthService {
                 .toList();
         return Map.of("roles", roleCodes, "accessCodes", permCodes);
     }
+    /**
+     * 用户登出
+     */
     @Override
     public void logout(Long userId) {
         if (userId != null) {
             jwtUtils.deleteRefreshToken(userId);
-            log.info("用户 {} 已登出", userId);
+            // 直接调用 notificationController
+            notificationController.removeConnection(userId);
         }
     }
     // ========== 辅助方法 ==========

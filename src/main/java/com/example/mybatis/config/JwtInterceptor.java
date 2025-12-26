@@ -24,8 +24,16 @@ public class JwtInterceptor implements HandlerInterceptor {
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
-        // 提取 Access Token
+        // 优先从 Header 提取 Token
         String accessToken = extractToken(request, "Authorization");
+        // 如果 Header 没有，从 URL 参数提取（用于 SSE）
+        if (accessToken == null) {
+            accessToken = request.getParameter("token");
+            if (accessToken != null) {
+                log.debug("从 URL 参数提取 Token: {}", accessToken.substring(0, 20) + "...");
+            }
+        }
+
 
         // 先判断 Token 是否为空
         if (accessToken == null) {
