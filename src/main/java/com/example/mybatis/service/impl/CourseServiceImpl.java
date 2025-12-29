@@ -5,6 +5,7 @@ import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.dto.CourseDTO;
 import com.example.mybatis.entity.Course;
 import com.example.mybatis.entity.Highlight;
+import com.example.mybatis.entity.Member;
 import com.example.mybatis.mapper.CourseMapper;
 import com.example.mybatis.service.CourseService;
 import com.example.mybatis.service.NotificationService;
@@ -22,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * @author yihui
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -86,8 +90,8 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         try {
             // 获取所有会员ID（简化处理，实际可能需要分批）
             List<Long> memberIds = memberService.list().stream()
-                    .map(member -> member.getUserId())
-                    .collect(Collectors.toList());
+                    .map(Member::getUserId)
+                    .toList();
 
             String content = String.format(
                     "新课程【%s】已上线！%s，%s",

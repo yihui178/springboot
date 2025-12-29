@@ -7,6 +7,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * @author yihui
+ */
 @Data
 @TableName("notification")
 public class Notification {
@@ -23,7 +26,7 @@ public class Notification {
     private String content;
 
     @TableField("type")
-    private String type;  // ACTIVITY/COURSE/NEWS/SYSTEM
+    private String type;
 
     @TableField("is_read")
     private Boolean isRead;

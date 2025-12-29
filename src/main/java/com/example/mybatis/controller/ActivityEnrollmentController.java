@@ -44,14 +44,15 @@ public class ActivityEnrollmentController {
         return enrollmentService.reviewEnrollment(enrollmentId, status);
     }
 
-    /**
+    /*
      * 取消报名
-     */
+
 //    @PostMapping("/cancel")
 //    @Operation(summary = "取消报名")
 //    public HttpResult<String> cancel(@RequestBody Map<String, Long> params) {
 //        return enrollmentService.cancelEnrollment(params.get("id"));
 //    }
+    */
 
     /**
      * 获取活动的报名列表

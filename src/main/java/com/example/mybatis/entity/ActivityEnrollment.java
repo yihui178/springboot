@@ -45,7 +45,7 @@ public class ActivityEnrollment {
     @TableField("update_time")
     private LocalDateTime updateTime;
     @TableField("enrollment_type")
-    private String enrollmentType; // training | activity
+    private String enrollmentType;
     @TableField("course_id")
-    private Long courseId; // 关联的课程ID
+    private Long courseId;
 }

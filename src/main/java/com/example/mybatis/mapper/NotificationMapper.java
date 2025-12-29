@@ -5,6 +5,9 @@ import com.example.mybatis.entity.Notification;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+/**
+ * @author yihui
+ */
 @Mapper
 public interface NotificationMapper extends BaseMapper<Notification> {
     /**

@@ -15,6 +15,7 @@ import java.util.UUID;
 
 /**
  * 阿里云 OSS 工具类
+ * @author yihui
  */
 @Slf4j
 @Component

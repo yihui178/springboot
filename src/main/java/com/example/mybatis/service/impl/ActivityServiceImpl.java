@@ -58,7 +58,8 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
         validateActivityDTO(dto);
 
         Activity activity = convertToEntity(dto);
-        activity.setCurrentParticipants(0);  // 初始报名人数为0
+        // 初始报名人数为0
+        activity.setCurrentParticipants(0);
 
         boolean success = this.save(activity);
         if (!success) {

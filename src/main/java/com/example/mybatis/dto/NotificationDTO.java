@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * @author yihui
+ */
 @Data
 @Schema(description = "通知数据传输对象")
 public class NotificationDTO {

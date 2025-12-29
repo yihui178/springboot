@@ -8,7 +8,6 @@ aliyun:
 
 jwt:
     secret: ${JWT_SECRET}
-    expire-ms: 3600000  # Token有效期(毫秒)：1小时
     access-token-expire-ms: 300000   # Access Token
     refresh-token-expire-ms: 3600000 # Refresh Token
 #aj:

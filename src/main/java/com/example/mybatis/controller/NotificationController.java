@@ -38,7 +38,7 @@ public class NotificationController {
     public SseEmitter subscribe(@RequestParam(required = false) String token) {
 
         // 手动验证 token 并提取 userId
-        Long userId = null;
+        Long userId;
         if (token != null && !token.isEmpty()) {
             try {
                 Claims claims = jwtUtils.parseClaims(token);
@@ -50,21 +50,15 @@ public class NotificationController {
         } else {
             throw new RuntimeException("缺少 token 参数");
         }
-        // 创建 SSE 连接
-        SseEmitter emitter = new SseEmitter(1800000L); // 30分钟超时
+        // 创建 SSE 连接  30分钟超时
+        SseEmitter emitter = new SseEmitter(1800000L);
         final Long finalUserId = userId;
         // 保存连接
         sseEmitters.put(finalUserId, emitter);
         // 连接关闭时清理
-        emitter.onCompletion(() -> {
-            sseEmitters.remove(finalUserId);
-        });
-        emitter.onTimeout(() -> {
-            sseEmitters.remove(finalUserId);
-        });
-        emitter.onError(throwable -> {
-            sseEmitters.remove(finalUserId);
-        });
+        emitter.onCompletion(() -> sseEmitters.remove(finalUserId));
+        emitter.onTimeout(() -> sseEmitters.remove(finalUserId));
+        emitter.onError(throwable -> sseEmitters.remove(finalUserId));
         // 发送初始化消息
         try {
             emitter.send(SseEmitter.event().name("connect").data("连接成功"));
@@ -79,11 +73,7 @@ public class NotificationController {
     public void removeConnection(Long userId) {
         SseEmitter emitter = sseEmitters.remove(userId);
         if (emitter != null) {
-            try {
-                emitter.complete();
-
-            } catch (Exception e) {
-            }
+            emitter.complete();
         }
     }
     /**

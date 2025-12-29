@@ -98,18 +98,4 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    /**
-     * 从 Token 提取 userId
-     */
-    public Long parseUserId(String token) {
-        Claims claims = parseClaims(token);
-        Object value = claims.get("userId");
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-        if (value instanceof String) {
-            return Long.valueOf((String) value);
-        }
-        return null;
-    }
 }

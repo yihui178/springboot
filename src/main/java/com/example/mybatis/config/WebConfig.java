@@ -14,19 +14,27 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
-                .addPathPatterns("/**") // 拦截所有请求
+                // 拦截所有请求
+                .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/auth/login",           // 登录
-                        "/auth/register",        // 注册
-                        "/auth/verifyCaptcha",   // 验证码校验
-                        "/auth/refreshToken",    // 刷新token
-//                        "/auth/logout",
-                        "/captcha/**",           // 验证码
-                        "/druid/**",             // Druid监控
-                        "/swagger-ui/**",        // Swagger
+                        // 登录
+                        "/auth/login",
+                        // 注册
+                        "/auth/register",
+                        // 验证码校验
+                        "/auth/verifyCaptcha",
+                        // 刷新token
+                        "/auth/refreshToken",
+                        // 验证码
+                        "/captcha/**",
+                        // Druid监控
+                        "/druid/**",
+                        // Swagger
+                        "/swagger-ui/**",
                         "/v3/api-docs/**",
-                        "/test/**",           //测试接口（生产环境需删除）
-                        "/migration/**",
+
+//                        "/migration/**",
+                        // SSE 连接
                         "/notification/sse"
                         );
     }

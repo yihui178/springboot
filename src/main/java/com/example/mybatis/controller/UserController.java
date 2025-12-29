@@ -1,10 +1,10 @@
 package com.example.mybatis.controller;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.mybatis.service.MemberService;
 import com.example.mybatis.entity.Member;
-import com.example.mybatis.utils.CheckParamUtils;
 import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.entity.User;
 import com.example.mybatis.common.HttpResult;
@@ -13,26 +13,32 @@ import com.example.mybatis.utils.RequestUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 /**
  * 用户管理控制器
  * @author yihui
  */
+@Validated
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 @Tag(name = "用户管理", description = "用户信息的增删改查接口")
 public class UserController {
+
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final MemberService memberService;
+
     /**
      * 分页查询用户
      */
@@ -60,7 +66,7 @@ public class UserController {
         // 转换为 DTO
         List<UserDTO> dtoList = result.getRecords().stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         // 封装返回结果
         Map<String, Object> data = new HashMap<>();
@@ -71,6 +77,7 @@ public class UserController {
 
         return HttpResult.ok(data);
     }
+
     /**
      * 查询所有用户
      */
@@ -80,23 +87,29 @@ public class UserController {
         List<UserDTO> list = userService.list()
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
         return HttpResult.ok(list);
     }
+
     /**
      * 根据 ID 查询用户
      */
     @GetMapping("/{id}")
     @Operation(summary = "根据ID查询单个用户信息")
-    public HttpResult<UserDTO> getUserById(@PathVariable("id") Long id) {
-        CheckParamUtils.isBiggerZero(id, "用户ID");
+    public HttpResult<UserDTO> getUserById(
+            @PathVariable("id")
+            @Min(value = 1, message = "用户ID必须大于0")  // 使用 Spring Validation
+            Long id) {
+
         User user = userService.getById(id);
         if (user == null) {
             return HttpResult.error(404, "用户不存在");
         }
+
         UserDTO dto = convertToDTO(user);
         return HttpResult.ok(dto);
     }
+
     /**
      * 新增用户
      */
@@ -135,12 +148,11 @@ public class UserController {
 
         // 保存用户
         boolean success = userService.save(user);
-        if (success) {
-            return HttpResult.ok("新增成功");
-        } else {
-            return HttpResult.error(500, "新增失败");
-        }
+        return success
+                ? HttpResult.ok("新增成功")
+                : HttpResult.error(500, "新增失败");
     }
+
     /**
      * 更新用户
      */
@@ -184,12 +196,11 @@ public class UserController {
         }
 
         boolean success = userService.updateById(user);
-        if (success) {
-            return HttpResult.ok("更新成功");
-        } else {
-            return HttpResult.error(500, "更新失败");
-        }
+        return success
+                ? HttpResult.ok("更新成功")
+                : HttpResult.error(500, "更新失败");
     }
+
     /**
      * 删除用户
      */
@@ -212,11 +223,9 @@ public class UserController {
         }
 
         boolean success = userService.removeById(id);
-        if (success) {
-            return HttpResult.ok("删除成功");
-        } else {
-            return HttpResult.error(500, "删除失败");
-        }
+        return success
+                ? HttpResult.ok("删除成功")
+                : HttpResult.error(500, "删除失败");
     }
 
     /**
@@ -228,13 +237,13 @@ public class UserController {
         // 查询所有用户
         List<User> users = userService.list();
 
-        // 查询已经是会员的用户ID
+        // 查询已经是会员的用户ID (使用 toList())
         List<Long> memberUserIds = memberService.list()
                 .stream()
                 .map(Member::getUserId)
                 .toList();
 
-        // 转换为简化的DTO（排除已是会员的用户）
+
         List<Map<String, Object>> result = users.stream()
                 .filter(user -> !memberUserIds.contains(user.getId()))
                 .map(user -> {
@@ -260,7 +269,7 @@ public class UserController {
             if (userId == null) {
                 return HttpResult.ok(false);
             }
-            // 调用带缓存的方法（不再直接查询）
+            // 调用带缓存的方法
             Boolean isMember = memberService.isUserMember(userId);
             return HttpResult.ok(isMember);
         } catch (Exception e) {

@@ -6,6 +6,9 @@ import com.example.mybatis.dto.NotificationDTO;
 import com.example.mybatis.entity.Notification;
 import com.github.pagehelper.PageInfo;
 
+/**
+ * @author yihui
+ */
 public interface NotificationService extends IService<Notification> {
     /**
      * 分页查询用户通知

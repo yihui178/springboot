@@ -3,6 +3,7 @@ package com.example.mybatis.controller;
 import com.example.mybatis.common.HttpResult;
 import com.example.mybatis.dto.NewsDTO;
 import com.example.mybatis.entity.Member;
+import com.example.mybatis.entity.Role;
 import com.example.mybatis.service.MemberService;
 import com.example.mybatis.service.NewsService;
 import com.example.mybatis.service.UserRoleService;
@@ -154,7 +155,7 @@ public class NewsController {
 
             // 2. 查询角色代码
             List<String> roleCodes = roleService.listByIds(roleIds).stream()
-                    .map(role -> role.getCode())
+                    .map(Role::getCode)
                     .toList();
 
             // 3. 判断是否包含管理员角色

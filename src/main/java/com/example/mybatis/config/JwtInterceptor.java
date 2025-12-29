@@ -3,6 +3,7 @@ import com.example.mybatis.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,8 +19,10 @@ import java.util.List;
 public class JwtInterceptor implements HandlerInterceptor {
     private final JwtUtils jwtUtils;
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-                             Object handler) throws Exception {
+    public boolean preHandle(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull Object handler) throws Exception {
         // 放行 OPTIONS 预检请求
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
