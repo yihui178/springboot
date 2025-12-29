@@ -1,8 +1,9 @@
 INSERT INTO userdb.user_role (user_id, role_id) VALUES (2, 1);
-INSERT INTO userdb.user_role (user_id, role_id) VALUES (1993863963119132673, 1);
+INSERT INTO userdb.user_role (user_id, role_id) VALUES (4, 1);
 INSERT INTO userdb.user_role (user_id, role_id) VALUES (1, 2);
 INSERT INTO userdb.user_role (user_id, role_id) VALUES (1993863963056218113, 2);
 INSERT INTO userdb.user_role (user_id, role_id) VALUES (3, 3);
-INSERT INTO userdb.user_role (user_id, role_id) VALUES (4, 3);
 INSERT INTO userdb.user_role (user_id, role_id) VALUES (1993863962729062402, 3);
-INSERT INTO userdb.user_role (user_id, role_id) VALUES (1996502757320351746, 3);
+INSERT INTO userdb.user_role (user_id, role_id) VALUES (1999025489006264322, 3);
+INSERT INTO userdb.user_role (user_id, role_id) VALUES (2000495490250813442, 3);
+INSERT INTO userdb.user_role (user_id, role_id) VALUES (2004101284879872001, 3);
